@@ -2,27 +2,24 @@ use opengl_graphics::{Texture, TextureSettings, GlGraphics, OpenGL, GlyphCache};
 use piston::input::{RenderArgs, UpdateArgs, Button};
 use graphics::Context;
 use std::path::PathBuf;
+use std::rc::Rc;
 
 use super::gamestate::GameState;
 use super::renderable::Renderable;
 use super::gamedata::GameData;
 use super::states::State;
+use super::texture_loader::Texture_Loader;
 
 pub struct first_level{
-    background_texture: Texture
+    background_texture: Texture,
 }
 
 impl first_level {
-    pub fn new(assets_path: PathBuf) -> first_level {
-        let background_path = assets_path.join("City Background.png");
+    pub fn new(texture_loader: Rc<Texture_Loader>) -> first_level {
+        let background_texture = texture_loader.load_texture("City Background.png");
         
-        let background = Texture::from_path(
-            background_path,
-            &TextureSettings::new()
-        ).unwrap();
-
         first_level {
-            background_texture: background
+            background_texture: background_texture
         }
     }
 }

@@ -14,6 +14,7 @@ use piston::input::{RenderEvent, PressEvent, UpdateEvent};
 use piston::window::*;
 use piston_window::*;
 use gamestate::GameState;
+use texture_loader::Texture_Loader;
 use states::State;
 use std::rc::Rc;
 use std::cmp;
@@ -30,6 +31,7 @@ mod AABB;
 mod moving_object;
 mod game_object;
 mod first_level;
+mod texture_loader;
 
 fn main() {
     let opengl = OpenGL::V3_2;
@@ -40,11 +42,13 @@ fn main() {
         .build()
         .unwrap();
 
-    let assets = find_folder::Search::ParentsThenKids(3, 3)
+    let assets = Rc::new(find_folder::Search::ParentsThenKids(3, 3)
                 .for_folder("assets")
-                .unwrap();
+                .unwrap());
+    
+    let texture_loader = Rc::new(Texture_Loader::new(Rc::clone(&assets)));
 
-    let mut current_state: Box<dyn GameState> = Box::new(first_level::first_level::new(assets));
+    let mut current_state: Box<dyn GameState> = Box::new(first_level::first_level::new(Rc::clone(&texture_loader)));
 
     let mut events = get_events_loop();
     let mut glyph_cache = get_font();
