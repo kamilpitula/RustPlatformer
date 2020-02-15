@@ -15,21 +15,13 @@ use piston::window::*;
 use piston_window::*;
 use gamestate::GameState;
 use states::State;
-use scorecontroller::ScoreController;
 use std::rc::Rc;
 use std::cmp;
 use std::cell::RefCell;
 
 mod gamestate;
-mod startgame;
-mod game;
-mod endgame;
-mod snake;
-mod points;
-mod userscore;
 mod states;
 mod gamedata;
-mod scorecontroller;
 mod colors;
 mod config;
 mod renderable;
@@ -38,14 +30,11 @@ mod textwriter;
 fn main() {
     let opengl = OpenGL::V3_2;
 
-    let mut window: Window = WindowSettings::new("Rusty Snake", [800, 800])
+    let mut window: Window = WindowSettings::new("Rusty Platformer", [800, 800])
         .graphics_api(OpenGL::V3_2)
         .exit_on_esc(true)
         .build()
         .unwrap();
-    
-    let mut current_state: Box<dyn GameState> = Box::new(startgame::StartGame::new(32));
-    let score_controller = Rc::new(RefCell::new(ScoreController::new()));
 
     let mut events = get_events_loop();
     let mut glyph_cache = get_font();
@@ -69,24 +58,15 @@ fn main() {
 
                 // let c = c.scale(width / 800 as f64, height / 800 as f64);
                 let c = c.trans(left, bottom);
-                current_state.render(&c, &mut gl, &mut glyph_cache);
             });
         }
 
         if let Some(args) = e.update_args(){
-            let stateFinished = current_state.update(&args);
             
-            current_state = 
-            match stateFinished {
-                State::Start(data) =>{Box::new(startgame::StartGame::new(32))},
-                State::Game(data) => {Box::new(game::Game::new(32, data, Rc::clone(&score_controller)))},
-                State::End(data) => {Box::new(endgame::EndGame::new(32, data, Rc::clone(&score_controller)))},
-                State::None => {current_state},
-            }
         }
 
         if let Some(args) = e.press_args(){
-            current_state.key_press(&args);
+            // current_state.key_press(&args);
         }
     }
 }

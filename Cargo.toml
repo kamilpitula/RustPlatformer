@@ -1,5 +1,5 @@
 [package]
-name = "RustySnake"
+name = "RustyPlatormer"
 version = "0.1.0"
 authors = ["Kamil Pituła <kamil.pitula@outlook.com>"]
 edition = "2018"
