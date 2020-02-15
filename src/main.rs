@@ -34,7 +34,7 @@ mod first_level;
 fn main() {
     let opengl = OpenGL::V3_2;
 
-    let mut window: Window = WindowSettings::new("Rusty Platformer", [800, 800])
+    let mut window: Window = WindowSettings::new("Rusty Platformer", [1120, 800])
         .graphics_api(OpenGL::V3_2)
         .exit_on_esc(true)
         .build()
@@ -57,17 +57,14 @@ fn main() {
 
             gl.draw(args.viewport(), |c, mut gl| {
                 clear(colors::GRAY, gl);
-                let size = c.get_view_size();
-                let size_x = size[0];
-                let size_y = size[1];
-                let width = size_x.min((size_y * ax as f64) / ay as f64);
-                let height = size_y.min((size_x * ay as f64) / ax as f64);
-                let left = (size_x - width) / 2.0;
-                let bottom = (size_y - height) / 2.0;
-                let offset = (left, bottom);
 
-                // let c = c.scale(width / 800 as f64, height / 800 as f64);
+                let (width,height, left, bottom) = calculate_viewport(&c);
+
+                let c = c.scale(
+                    width / config::BOARD_SIZE_X as f64,
+                    height / config::BOARD_SIZE_Y as f64);
                 let c = c.trans(left, bottom);
+
                 current_state.render(&c, &mut gl, &mut glyph_cache);
             });
         }
@@ -107,4 +104,16 @@ fn get_events_loop() -> Events {
     settings.max_fps = config::MAX_FPS;
 
     Events::new(settings)
+}
+
+fn calculate_viewport(ctx: &Context) -> (f64, f64, f64, f64) {
+    let size = ctx.get_view_size();
+    let size_x = size[0];
+    let size_y = size[1];
+    let width = size_x.min((size_y * config::BOARD_SIZE_X as f64) / config::BOARD_SIZE_Y as f64);
+    let height = size_y.min((size_x * config::BOARD_SIZE_Y as f64) / config::BOARD_SIZE_X as f64);
+    let left = (size_x - width) / 2.0;
+    let bottom = (size_y - height) / 2.0;
+    
+    (width, height, left, bottom)
 }
