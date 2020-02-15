@@ -26,6 +26,9 @@ mod colors;
 mod config;
 mod renderable;
 mod textwriter;
+mod AABB;
+mod moving_object;
+mod game_object;
 
 fn main() {
     let opengl = OpenGL::V3_2;
