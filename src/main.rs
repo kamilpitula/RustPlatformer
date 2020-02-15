@@ -40,7 +40,11 @@ fn main() {
         .build()
         .unwrap();
 
-    let mut current_state: Box<dyn GameState> = Box::new(first_level::first_level::new());
+    let assets = find_folder::Search::ParentsThenKids(3, 3)
+                .for_folder("assets")
+                .unwrap();
+
+    let mut current_state: Box<dyn GameState> = Box::new(first_level::first_level::new(assets));
 
     let mut events = get_events_loop();
     let mut glyph_cache = get_font();
