@@ -29,9 +29,10 @@ mod renderable;
 mod textwriter;
 mod AABB;
 mod moving_object;
-mod game_object;
 mod first_level;
 mod texture_loader;
+mod camera;
+mod background;
 
 fn main() {
     let opengl = OpenGL::V3_2;

@@ -1,17 +1,21 @@
 use opengl_graphics::{Texture, TextureSettings, GlGraphics, OpenGL, GlyphCache};
 use piston::input::{RenderArgs, UpdateArgs, Button};
+use piston::input::Button::Keyboard;
+use piston::input::keyboard::Key;
 use graphics::Context;
 use std::path::PathBuf;
 use std::rc::Rc;
 
 use super::gamestate::GameState;
 use super::renderable::Renderable;
+use super::camera::camera_dependent_object;
 use super::gamedata::GameData;
 use super::states::State;
 use super::texture_loader::Texture_Loader;
+use super::background::Background;
 
 pub struct first_level{
-    background_texture: Texture,
+    background: Background,
 }
 
 impl first_level {
@@ -19,16 +23,14 @@ impl first_level {
         let background_texture = texture_loader.load_texture("City Background.png");
         
         first_level {
-            background_texture: background_texture
+            background: Background::new(background_texture)
         }
     }
 }
 
 impl GameState for first_level{
     fn render(&mut self, ctx: &Context, mut gl: &mut GlGraphics, glyphs: &mut GlyphCache){
-        use graphics::*;
-        
-        image(&self.background_texture, ctx.transform, gl);
+        self.background.render(&ctx, &mut gl);
     }
 
     fn update(&mut self, args: &UpdateArgs) -> State<GameData> {
@@ -36,6 +38,10 @@ impl GameState for first_level{
     }
 
     fn key_press(&mut self, args: &Button){
-            
+        match *args {
+            Keyboard(Key::A) | Keyboard(Key::Left) => self.background.move_object(2.0, 0.0),
+            Keyboard(Key::D) | Keyboard(Key::Right) => self.background.move_object(-2.0, 0.0),
+            _ => {/* Do nothing */}
+        }
     }
 }
