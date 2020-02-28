@@ -13,9 +13,11 @@ use super::gamedata::GameData;
 use super::states::State;
 use super::texture_loader::Texture_Loader;
 use super::background::Background;
+use super::character::Character;
 
 pub struct first_level{
     background: Background,
+    character: Character
 }
 
 impl first_level {
@@ -23,7 +25,8 @@ impl first_level {
         let background_texture = texture_loader.load_texture("City Background.png");
         
         first_level {
-            background: Background::new(background_texture)
+            background: Background::new(background_texture),
+            character: Character::new()
         }
     }
 }
@@ -31,6 +34,7 @@ impl first_level {
 impl GameState for first_level{
     fn render(&mut self, ctx: &Context, mut gl: &mut GlGraphics, glyphs: &mut GlyphCache){
         self.background.render(&ctx, &mut gl);
+        self.character.render(&ctx, &mut gl);
     }
 
     fn update(&mut self, args: &UpdateArgs) -> State<GameData> {

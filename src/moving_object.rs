@@ -25,6 +25,26 @@ pub struct Moving_Object{
 }
 
 impl Moving_Object {
+    pub fn new(position: Vec2d, size: Vec2d) -> Moving_Object {
+        Moving_Object{
+            position: position,
+            old_position: [0.0, 0.0],
+            speed: [0.0, 0.0],
+            old_speed: [0.0, 0.0],
+            scale: [1.0, 1.0],
+            pushed_right_wall: false,
+            pushes_right_wall: false,
+            pushed_left_wall: false,
+            pushes_left_wall: false,
+            was_on_ground: true,
+            on_ground: true,
+            was_at_ceiling: false,
+            at_ceiling: false,
+            aabb: AABB::new(position, mul_scalar(size, 2.0)),
+            aabb_offset: mul_scalar(size, 2.0)
+        }
+    }
+
     pub fn update_physics(&mut self, delta: f64) {
 
         self.old_position = self.position;

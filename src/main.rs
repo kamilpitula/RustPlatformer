@@ -33,6 +33,7 @@ mod first_level;
 mod texture_loader;
 mod camera;
 mod background;
+mod character;
 
 fn main() {
     let opengl = OpenGL::V3_2;
