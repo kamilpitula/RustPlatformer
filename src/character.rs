@@ -11,7 +11,7 @@ pub struct Character {
 impl Character {
     pub fn new() -> Character {
         Character { 
-            moving_object: Moving_Object::new([0.0, 0.0], [10.0, 10.0]),
+            moving_object: Moving_Object::new([0.0, 700.0], [10.0, 10.0]),
             current_state: CharacterState::Stand,
             key_input: KeyInput::None
         }
@@ -29,7 +29,7 @@ impl Character {
                         self.current_state = CharacterState::Walk
                     },
                     KeyInput::Jump => {
-                        self.moving_object.speed = [0.0, -10.0];
+                        self.moving_object.speed = [0.0, -config::JUMP_SPEED];
                         self.current_state = CharacterState::Jump;
                     }
                     KeyInput::None => {
@@ -51,16 +51,23 @@ impl Character {
                         if self.moving_object.pushes_left_wall {
                             self.moving_object.speed = [0.0, 0.0];
                         } else {
-                            self.moving_object.speed = [config::WALK_SPEED, 0.0];
+                            self.moving_object.speed = [-config::WALK_SPEED, 0.0];
                         }
                     },
                     KeyInput::Jump => {
-                        add(self.moving_object.speed, [0.0, -10.0]);
+                        self.moving_object.speed = add(self.moving_object.speed, [0.0, -config::JUMP_SPEED]);
+                        self.current_state = CharacterState::Jump;
+                      
                     },
                     KeyInput::None => {self.current_state = CharacterState::Stand;},
                 }
             },
-            CharacterState::Jump => {},
+            CharacterState::Jump => {
+                self.moving_object.speed[1] += config::GRAVITY * delta;
+                if self.moving_object.on_ground {
+                    self.current_state = CharacterState::Stand;
+                }
+            },
             CharacterState::GrabLedge => {}
         }
         self.moving_object.update_physics(delta);
@@ -84,7 +91,7 @@ impl Renderable for Character {
 
         let point_trans = ctx
                 .transform
-                .trans(character_x, character_y + 700.0);
+                .trans(character_x, character_y);
         
         rectangle(color, square, point_trans, gl);
     }

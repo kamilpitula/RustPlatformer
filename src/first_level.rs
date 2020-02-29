@@ -46,6 +46,7 @@ impl GameState for first_level{
         match *args {
             Keyboard(Key::A) | Keyboard(Key::Left) => self.character.key_input = KeyInput::GoLeft,
             Keyboard(Key::D) | Keyboard(Key::Right) => self.character.key_input = KeyInput::GoRight,
+            Keyboard(Key::Space) => self.character.key_input = KeyInput::Jump,
             _ => {}
         }
     }
@@ -54,6 +55,7 @@ impl GameState for first_level{
         match *args {
             Keyboard(Key::A) | Keyboard(Key::Left) => self.character.key_input = KeyInput::None,
             Keyboard(Key::D) | Keyboard(Key::Right) => self.character.key_input = KeyInput::None,
+            Keyboard(Key::Space) => self.character.key_input = KeyInput::None,
             _ => {}
         }
     }

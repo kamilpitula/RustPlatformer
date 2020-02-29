@@ -5,3 +5,5 @@ pub static TARGET_ASPECT: (u32, u32) = (1120, 800);
 pub static BOARD_SIZE_Y: i16 = 800;
 pub static BOARD_SIZE_X: i16 = 1120;
 pub static WALK_SPEED: f64 = 60.0;
+pub static JUMP_SPEED: f64 = 200.0;
+pub static GRAVITY: f64 = 400.0;

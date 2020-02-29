@@ -56,8 +56,8 @@ impl Moving_Object {
 
         self.position = add(self.position, mul_scalar(self.speed, delta));
 
-        if self.position[1] < 0.0 {
-            self.position[1] = 0.0;
+        if self.position[1] > 700.0 {
+            self.position[1] = 700.0;
             self.on_ground = true;
         } else {
             self.on_ground = false;
