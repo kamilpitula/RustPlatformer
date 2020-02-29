@@ -1,25 +1,69 @@
 use super::moving_object::Moving_Object;
+use super::config;
+use graphics::math::*;
 
 pub struct Character {
     moving_object: Moving_Object,
-    current_state: CharacterState
+    current_state: CharacterState,
+    pub key_input: KeyInput
 }
 
 impl Character {
     pub fn new() -> Character {
         Character { 
             moving_object: Moving_Object::new([0.0, 0.0], [10.0, 10.0]),
-            current_state: CharacterState::Stand
+            current_state: CharacterState::Stand,
+            key_input: KeyInput::None
         }
     }
 
-    pub fn character_update(&self){
+    pub fn character_update(&mut self, delta: f64){
         match &self.current_state {
-            Stand => {},
-            Walk => {},
-            Jump => {},
-            GrabLedge => {}
+            CharacterState::Stand => {
+                self.moving_object.speed = [0.0, 0.0];
+                if !self.moving_object.on_ground {
+                    self.current_state = CharacterState::Jump;
+                }
+                match self.key_input {
+                    KeyInput::GoLeft | KeyInput::GoRight => {
+                        self.current_state = CharacterState::Walk
+                    },
+                    KeyInput::Jump => {
+                        self.moving_object.speed = [0.0, -10.0];
+                        self.current_state = CharacterState::Jump;
+                    }
+                    KeyInput::None => {
+                        self.current_state = CharacterState::Stand;
+                    },
+                }
+
+            },
+            CharacterState::Walk => {
+                match self.key_input {
+                    KeyInput::GoRight => {
+                        if self.moving_object.pushes_left_wall {
+                            self.moving_object.speed = [0.0, 0.0];
+                        } else {
+                            self.moving_object.speed = [config::WALK_SPEED, 0.0];
+                        }
+                    },
+                    KeyInput::GoLeft => {
+                        if self.moving_object.pushes_left_wall {
+                            self.moving_object.speed = [0.0, 0.0];
+                        } else {
+                            self.moving_object.speed = [config::WALK_SPEED, 0.0];
+                        }
+                    },
+                    KeyInput::Jump => {
+                        add(self.moving_object.speed, [0.0, -10.0]);
+                    },
+                    KeyInput::None => {self.current_state = CharacterState::Stand;},
+                }
+            },
+            CharacterState::Jump => {},
+            CharacterState::GrabLedge => {}
         }
+        self.moving_object.update_physics(delta);
     }
 }
 
@@ -40,7 +84,7 @@ impl Renderable for Character {
 
         let point_trans = ctx
                 .transform
-                .trans(character_x, character_y);
+                .trans(character_x, character_y + 700.0);
         
         rectangle(color, square, point_trans, gl);
     }
@@ -51,4 +95,11 @@ enum CharacterState {
     Walk,
     Jump,
     GrabLedge
+}
+
+pub enum KeyInput {
+    None,
+    GoLeft,
+    GoRight,
+    Jump
 }

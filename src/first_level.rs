@@ -13,7 +13,7 @@ use super::gamedata::GameData;
 use super::states::State;
 use super::texture_loader::Texture_Loader;
 use super::background::Background;
-use super::character::Character;
+use super::character::{Character, KeyInput};
 
 pub struct first_level{
     background: Background,
@@ -38,14 +38,23 @@ impl GameState for first_level{
     }
 
     fn update(&mut self, args: &UpdateArgs) -> State<GameData> {
+            self.character.character_update(args.dt);
             return State::None;
     }
 
     fn key_press(&mut self, args: &Button){
         match *args {
-            Keyboard(Key::A) | Keyboard(Key::Left) => self.background.move_object(2.0, 0.0),
-            Keyboard(Key::D) | Keyboard(Key::Right) => self.background.move_object(-2.0, 0.0),
-            _ => {/* Do nothing */}
+            Keyboard(Key::A) | Keyboard(Key::Left) => self.character.key_input = KeyInput::GoLeft,
+            Keyboard(Key::D) | Keyboard(Key::Right) => self.character.key_input = KeyInput::GoRight,
+            _ => {}
+        }
+    }
+
+    fn key_release(&mut self, args: &Button){
+        match *args {
+            Keyboard(Key::A) | Keyboard(Key::Left) => self.character.key_input = KeyInput::None,
+            Keyboard(Key::D) | Keyboard(Key::Right) => self.character.key_input = KeyInput::None,
+            _ => {}
         }
     }
 }

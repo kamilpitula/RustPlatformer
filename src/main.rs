@@ -90,6 +90,10 @@ fn main() {
         if let Some(args) = e.press_args(){
             current_state.key_press(&args);
         }
+
+        if let Some(args) = e.release_args(){
+            current_state.key_release(&args);
+        }
     }
 }
 
