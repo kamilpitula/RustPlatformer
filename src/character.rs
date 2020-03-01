@@ -1,20 +1,26 @@
 use super::moving_object::Moving_Object;
 use super::config;
 use graphics::math::*;
+use std::collections::HashMap;
+use piston::input::keyboard::Key;
+use std::rc::Rc;
+use std::cell::RefCell;
 
 pub struct Character {
     moving_object: Moving_Object,
     current_state: CharacterState,
+    pub key_pressed_map: Rc<RefCell<HashMap<Key, bool>>>,
     pub pressed_left: bool,
     pub pressed_right: bool,
     pub pressed_jump: bool
 }
 
 impl Character {
-    pub fn new() -> Character {
+    pub fn new(key_map: Rc<RefCell<HashMap<Key, bool>>>) -> Character {
         Character { 
             moving_object: Moving_Object::new([0.0, 700.0], [10.0, 10.0]),
             current_state: CharacterState::Stand,
+            key_pressed_map: key_map,
             pressed_jump: false,
             pressed_left: false,
             pressed_right: false
