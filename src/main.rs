@@ -19,6 +19,7 @@ use states::State;
 use std::rc::Rc;
 use std::cmp;
 use std::cell::RefCell;
+use std::path::PathBuf;
 
 mod gamestate;
 mod states;
@@ -53,7 +54,7 @@ fn main() {
     let mut current_state: Box<dyn GameState> = Box::new(first_level::first_level::new(Rc::clone(&texture_loader)));
 
     let mut events = get_events_loop();
-    let mut glyph_cache = get_font();
+    let mut glyph_cache = get_font(Rc::clone(&assets));
 
     let mut gl = GlGraphics::new(opengl);
     let (ax, ay) = config::TARGET_ASPECT;
@@ -97,13 +98,8 @@ fn main() {
     }
 }
 
-fn get_font() -> GlyphCache<'static> {
-    let assets = find_folder::Search::ParentsThenKids(3, 3)
-                        .for_folder("assets")
-                        .unwrap();
-
-    let font_path = assets.join("AllertaStencil-Regular.ttf");
-
+fn get_font(assets_path: Rc<PathBuf>) -> GlyphCache<'static> {
+    let font_path = assets_path.join("AllertaStencil-Regular.ttf");
     GlyphCache::new(&font_path, (), TextureSettings::new()).unwrap()
 }
 
