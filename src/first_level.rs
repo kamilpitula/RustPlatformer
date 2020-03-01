@@ -13,11 +13,11 @@ use super::gamedata::GameData;
 use super::states::State;
 use super::texture_loader::Texture_Loader;
 use super::background::Background;
-use super::character::{Character, KeyInput};
+use super::character::Character;
 
 pub struct first_level{
     background: Background,
-    character: Character
+    character: Character,
 }
 
 impl first_level {
@@ -26,7 +26,7 @@ impl first_level {
         
         first_level {
             background: Background::new(background_texture),
-            character: Character::new()
+            character: Character::new(),
         }
     }
 }
@@ -44,18 +44,18 @@ impl GameState for first_level{
 
     fn key_press(&mut self, args: &Button){
         match *args {
-            Keyboard(Key::A) | Keyboard(Key::Left) => self.character.key_input = KeyInput::GoLeft,
-            Keyboard(Key::D) | Keyboard(Key::Right) => self.character.key_input = KeyInput::GoRight,
-            Keyboard(Key::Space) => self.character.key_input = KeyInput::Jump,
+            Keyboard(Key::A) | Keyboard(Key::Left) => self.character.pressed_left = true,
+            Keyboard(Key::D) | Keyboard(Key::Right) => self.character.pressed_right = true,
+            Keyboard(Key::Space) => self.character.pressed_jump = true,
             _ => {}
         }
     }
 
     fn key_release(&mut self, args: &Button){
         match *args {
-            Keyboard(Key::A) | Keyboard(Key::Left) => self.character.key_input = KeyInput::None,
-            Keyboard(Key::D) | Keyboard(Key::Right) => self.character.key_input = KeyInput::None,
-            Keyboard(Key::Space) => self.character.key_input = KeyInput::None,
+            Keyboard(Key::A) | Keyboard(Key::Left) => self.character.pressed_left = false,
+            Keyboard(Key::D) | Keyboard(Key::Right) => self.character.pressed_right = false,
+            Keyboard(Key::Space) => self.character.pressed_jump = false,
             _ => {}
         }
     }
