@@ -21,11 +21,13 @@ pub struct Moving_Object{
     pub on_ground: bool,
 
     pub was_at_ceiling: bool,
-    pub at_ceiling: bool
+    pub at_ceiling: bool,
+
+    bounds: Vec2d
 }
 
 impl Moving_Object {
-    pub fn new(position: Vec2d, size: Vec2d) -> Moving_Object {
+    pub fn new(position: Vec2d, size: Vec2d, bounds: Vec2d) -> Moving_Object {
         Moving_Object{
             position: position,
             old_position: [0.0, 0.0],
@@ -41,7 +43,35 @@ impl Moving_Object {
             was_at_ceiling: false,
             at_ceiling: false,
             aabb: AABB::new(position, mul_scalar(size, 2.0)),
-            aabb_offset: mul_scalar(size, 2.0)
+            aabb_offset: mul_scalar(size, 2.0),
+            bounds: bounds
+        }
+    }
+
+    fn check_right_wall_collision(&mut self) {
+        if self.position[0] > self.bounds[1] {
+            self.position[0] = self.bounds[1];
+            self.pushes_right_wall = true;
+        } else {
+            self.pushes_right_wall = false;
+        }
+    }
+
+    fn check_left_wall_collision(&mut self) {
+        if self.position[0] < self.bounds[0] {
+            self.position[0] = self.bounds[0];
+            self.pushes_left_wall = true;
+        } else {
+            self.pushes_left_wall = false;
+        }
+    }
+
+    fn check_ground_collision(&mut self) {
+        if self.position[1] > 700.0 {
+            self.position[1] = 700.0;
+            self.on_ground = true;
+        } else {
+            self.on_ground = false;
         }
     }
 
@@ -56,12 +86,9 @@ impl Moving_Object {
 
         self.position = add(self.position, mul_scalar(self.speed, delta));
 
-        if self.position[1] > 700.0 {
-            self.position[1] = 700.0;
-            self.on_ground = true;
-        } else {
-            self.on_ground = false;
-        }
+        self.check_left_wall_collision();
+        self.check_right_wall_collision();
+        self.check_ground_collision();
         
         self.aabb.center = add(self.position, self.aabb_offset);
     }

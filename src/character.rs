@@ -12,13 +12,13 @@ pub struct Character {
     pub key_pressed_map: Rc<RefCell<HashMap<Key, bool>>>,
     pub pressed_left: bool,
     pub pressed_right: bool,
-    pub pressed_jump: bool
+    pub pressed_jump: bool,
 }
 
 impl Character {
     pub fn new(key_map: Rc<RefCell<HashMap<Key, bool>>>) -> Character {
         Character { 
-            moving_object: Moving_Object::new([0.0, 700.0], [10.0, 10.0]),
+            moving_object: Moving_Object::new([0.0, 700.0], [10.0, 10.0], [0.0, 1080.0]),
             current_state: CharacterState::Stand,
             key_pressed_map: key_map,
             pressed_jump: false,
