@@ -5,22 +5,26 @@ use super::camera::camera_dependent_object;
 
 pub struct Background {
     background_texture: Texture,
-    x: f64,
+    pub x: f64,
     y: f64,
+    repeat: i8,
     width: f64,
     pub left: bool,
-    pub right: bool
+    pub right: bool,
+    pub combined_width: f64
 }
 
 impl Background {
-    pub fn new(texture: Texture) -> Background {
+    pub fn new(texture: Texture, repeat: i8, width: f64) -> Background {
         Background {
             background_texture: texture,
             x: 0.0,
             y: 0.0,
-            width: 1000.0,
+            width: width,
             left: false,
-            right: false
+            right: false,
+            repeat: repeat,
+            combined_width: width * repeat as f64
         }
     }
 }
@@ -29,13 +33,10 @@ impl Renderable for Background {
     fn render(&mut self, ctx: &Context, gl: &mut GlGraphics) {
         use graphics::*;
         
-        let transform = ctx.transform.trans(self.x, self.y);
-
-        image(&self.background_texture, transform, gl);
-
-        let transform2 = ctx.transform.trans(self.x + self.width, self.y);
-
-        image(&self.background_texture, transform2, gl);
+        for i in 0..self.repeat {
+            let transform = ctx.transform.trans(self.x + (self.width * i as f64), self.y);
+            image(&self.background_texture, transform, gl);    
+        }
     }
 }
 

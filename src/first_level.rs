@@ -22,7 +22,7 @@ pub struct first_level{
     character: Character,
     key_press: Rc<RefCell<HashMap<Key,bool>>>,
     objects: Vec<Box<camera_dependent_object>>,
-    camera: Camera
+    camera: Camera,
 }
 
 impl first_level {
@@ -36,7 +36,7 @@ impl first_level {
         (*key_press.borrow_mut()).insert(Key::D, false); 
 
         first_level {
-            background: Background::new(background_texture),
+            background: Background::new(background_texture, 2, 1000.0),
             character: Character::new(Rc::clone(&key_press)),
             camera: Camera::new(460.0, 660.0),
             objects: Vec::new(),
