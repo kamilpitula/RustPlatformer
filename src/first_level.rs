@@ -9,18 +9,20 @@ use std::cell::RefCell;
 
 use super::gamestate::GameState;
 use super::renderable::Renderable;
-use super::camera::camera_dependent_object;
 use super::gamedata::GameData;
 use super::states::State;
 use super::texture_loader::Texture_Loader;
 use super::background::Background;
 use super::character::Character;
+use super::camera::{Camera, camera_dependent_object};
 use std::collections::HashMap;
 
 pub struct first_level{
     background: Background,
     character: Character,
-    key_press: Rc<RefCell<HashMap<Key,bool>>>
+    key_press: Rc<RefCell<HashMap<Key,bool>>>,
+    objects: Vec<Box<camera_dependent_object>>,
+    camera: Camera
 }
 
 impl first_level {
@@ -29,12 +31,16 @@ impl first_level {
         let mut key_press = Rc::new(RefCell::new(HashMap::new()));
         (*key_press.borrow_mut()).insert(Key::Left, false); 
         (*key_press.borrow_mut()).insert(Key::Right, false); 
-        (*key_press.borrow_mut()).insert(Key::Space, false); 
+        (*key_press.borrow_mut()).insert(Key::Space, false);
+        (*key_press.borrow_mut()).insert(Key::A, false); 
+        (*key_press.borrow_mut()).insert(Key::D, false); 
 
         first_level {
             background: Background::new(background_texture),
             character: Character::new(Rc::clone(&key_press)),
-            key_press: key_press
+            camera: Camera::new(460.0, 660.0),
+            objects: Vec::new(),
+            key_press: key_press,
         }
     }
 }
@@ -47,6 +53,7 @@ impl GameState for first_level{
 
     fn update(&mut self, args: &UpdateArgs) -> State<GameData> {
             self.character.character_update(args.dt);
+            self.camera.update(&mut self.objects, &mut self.character, &mut self.background, args.dt);
             return State::None;
     }
 

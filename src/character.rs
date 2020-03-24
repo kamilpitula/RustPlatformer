@@ -7,7 +7,7 @@ use std::rc::Rc;
 use std::cell::RefCell;
 
 pub struct Character {
-    moving_object: Moving_Object,
+    pub moving_object: Moving_Object,
     current_state: CharacterState,
     pub key_pressed_map: Rc<RefCell<HashMap<Key, bool>>>,
     pub pressed_left: bool,

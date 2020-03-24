@@ -6,7 +6,10 @@ use super::camera::camera_dependent_object;
 pub struct Background {
     background_texture: Texture,
     x: f64,
-    y: f64
+    y: f64,
+    width: f64,
+    pub left: bool,
+    pub right: bool
 }
 
 impl Background {
@@ -14,7 +17,10 @@ impl Background {
         Background {
             background_texture: texture,
             x: 0.0,
-            y: 0.0
+            y: 0.0,
+            width: 1000.0,
+            left: false,
+            right: false
         }
     }
 }
@@ -26,6 +32,10 @@ impl Renderable for Background {
         let transform = ctx.transform.trans(self.x, self.y);
 
         image(&self.background_texture, transform, gl);
+
+        let transform2 = ctx.transform.trans(self.x + self.width, self.y);
+
+        image(&self.background_texture, transform2, gl);
     }
 }
 
