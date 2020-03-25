@@ -2,9 +2,11 @@ use opengl_graphics::{Texture, GlGraphics};
 use graphics::Context;
 use super::renderable::Renderable;
 use super::camera::camera_dependent_object;
+use super::config;
 
 pub struct Background {
     background_texture: Texture,
+    foreground_texture: Texture,
     pub x: f64,
     y: f64,
     repeat: i8,
@@ -15,9 +17,10 @@ pub struct Background {
 }
 
 impl Background {
-    pub fn new(texture: Texture, repeat: i8, width: f64) -> Background {
+    pub fn new(background_texture: Texture, foreground_texture: Texture, repeat: i8, width: f64) -> Background {
         Background {
-            background_texture: texture,
+            background_texture: background_texture,
+            foreground_texture: foreground_texture,
             x: 0.0,
             y: 0.0,
             width: width,
@@ -33,9 +36,14 @@ impl Renderable for Background {
     fn render(&mut self, ctx: &Context, gl: &mut GlGraphics) {
         use graphics::*;
         
-        for i in 0..self.repeat {
-            let transform = ctx.transform.trans(self.x + (self.width * i as f64), self.y);
+        for i in -1..self.repeat + 1 {
+            let transform = ctx.transform.trans(self.x * config::BACKGROUND_PARRALAX_FACTOR + (self.width * i as f64), self.y);
             image(&self.background_texture, transform, gl);    
+        }
+
+        for i in -1..self.repeat + 1 {
+            let transform = ctx.transform.trans(self.x + (self.width * i as f64), self.y);
+            image(&self.foreground_texture, transform, gl);    
         }
     }
 }

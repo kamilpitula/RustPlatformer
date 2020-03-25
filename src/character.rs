@@ -60,7 +60,6 @@ impl Character {
     }
 
     fn handle_walk(&mut self, delta: f64) {
-        
         if self.pressed_right {
             if self.moving_object.pushes_left_wall {
                 self.moving_object.speed = [0.0, 0.0];
@@ -81,7 +80,6 @@ impl Character {
              = add(self.moving_object.speed, [0.0, -config::JUMP_SPEED]);
             self.current_state = CharacterState::Jump;
         }
-        
         else {
             self.current_state = CharacterState::Stand;
         }

@@ -28,6 +28,7 @@ pub struct first_level{
 impl first_level {
     pub fn new(texture_loader: Rc<Texture_Loader>) -> first_level {
         let background_texture = texture_loader.load_texture("City Background.png");
+        let foreground_texture = texture_loader.load_texture("City Foreground.png");
         let mut key_press = Rc::new(RefCell::new(HashMap::new()));
         (*key_press.borrow_mut()).insert(Key::Left, false); 
         (*key_press.borrow_mut()).insert(Key::Right, false); 
@@ -36,7 +37,7 @@ impl first_level {
         (*key_press.borrow_mut()).insert(Key::D, false); 
 
         first_level {
-            background: Background::new(background_texture, 2, 1000.0),
+            background: Background::new(background_texture, foreground_texture, 2, 1000.0),
             character: Character::new(Rc::clone(&key_press)),
             camera: Camera::new(460.0, 660.0),
             objects: Vec::new(),
