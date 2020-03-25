@@ -51,7 +51,7 @@ impl Character {
             self.current_state = CharacterState::Walk
         }
         else if self.pressed_jump {
-            self.moving_object.speed = [0.0, -config::JUMP_SPEED];
+            self.moving_object.speed = add(self.moving_object.speed, [0.0, -config::JUMP_SPEED]);
             self.current_state = CharacterState::Jump;
         }
         else {
