@@ -1,11 +1,14 @@
 use graphics::math::*;
 use super::AABB::AABB;
+use super::config;
 
 pub struct Moving_Object{
     pub old_position: Vec2d,
     pub position: Vec2d,
     pub old_speed: Vec2d,
     pub speed: Vec2d,
+    pub old_accelaration: Vec2d,
+    pub acceleration: Vec2d,
     pub scale: Vec2d,
 
     pub aabb: AABB,
@@ -31,6 +34,8 @@ impl Moving_Object {
         Moving_Object{
             position: position,
             old_position: [0.0, 0.0],
+            acceleration: [0.0, 0.0],
+            old_accelaration: [0.0, 0.0],
             speed: [0.0, 0.0],
             old_speed: [0.0, 0.0],
             scale: [1.0, 1.0],
@@ -75,10 +80,25 @@ impl Moving_Object {
         }
     }
 
+    fn limit_walk_speed(&mut self, calculated_speed: Vec2d) {
+        if calculated_speed[0] > config::WALK_SPEED {
+            self.speed = [config::WALK_SPEED, self.speed[1]];
+        } else if calculated_speed[0] < -config::WALK_SPEED {
+            self.speed = [-config::WALK_SPEED, self.speed[1]];
+        } else {
+            self.speed = calculated_speed;
+        }
+    }
+
     pub fn update_physics(&mut self, delta: f64) {
 
         self.old_position = self.position;
         self.old_speed = self.speed;
+
+        let calculated_speed = add(self.speed, mul_scalar(self.acceleration, delta));
+        self.limit_walk_speed(calculated_speed);
+        self.acceleration[0] = self.speed[0] * -config::FRICTION;
+        
         self.was_on_ground = self.on_ground;
         self.pushed_right_wall = self.pushes_right_wall;
         self.pushed_left_wall = self.pushes_left_wall;
@@ -92,4 +112,6 @@ impl Moving_Object {
         
         self.aabb.center = add(self.position, self.aabb_offset);
     }
+
+    
 }

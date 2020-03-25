@@ -44,7 +44,6 @@ impl Character {
     }
 
     fn handle_stand(&mut self, delta: f64) {
-        self.moving_object.speed = [0.0, 0.0];
         if !self.moving_object.on_ground {
             self.current_state = CharacterState::Jump;
         }
@@ -61,23 +60,25 @@ impl Character {
     }
 
     fn handle_walk(&mut self, delta: f64) {
+        
         if self.pressed_right {
             if self.moving_object.pushes_left_wall {
                 self.moving_object.speed = [0.0, 0.0];
             } else {
-                self.moving_object.speed = [config::WALK_SPEED, 0.0];
+                self.moving_object.acceleration = [config::ACCELERATION, 0.0];
             }
         }
         else if self.pressed_left {
             if self.moving_object.pushes_left_wall {
                 self.moving_object.speed = [0.0, 0.0];
             } else {
-                self.moving_object.speed = [-config::WALK_SPEED, 0.0];
+                self.moving_object.acceleration = [-config::ACCELERATION, 0.0];
             }
         }
 
         if self.pressed_jump {
-            self.moving_object.speed = add(self.moving_object.speed, [0.0, -config::JUMP_SPEED]);
+            self.moving_object.speed
+             = add(self.moving_object.speed, [0.0, -config::JUMP_SPEED]);
             self.current_state = CharacterState::Jump;
         }
         
