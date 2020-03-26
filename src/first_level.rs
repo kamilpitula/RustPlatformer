@@ -38,7 +38,7 @@ impl first_level {
 
         first_level {
             background: Background::new(background_texture, foreground_texture, 2, 1000.0),
-            character: Character::new(Rc::clone(&key_press)),
+            character: Character::new(Rc::clone(&key_press), Rc::clone(&texture_loader)),
             camera: Camera::new(460.0, 660.0),
             objects: Vec::new(),
             key_press: key_press,

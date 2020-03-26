@@ -35,6 +35,7 @@ mod texture_loader;
 mod camera;
 mod background;
 mod character;
+mod animator;
 
 fn main() {
     let opengl = OpenGL::V3_2;

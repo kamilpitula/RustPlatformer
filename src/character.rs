@@ -5,18 +5,28 @@ use std::collections::HashMap;
 use piston::input::keyboard::Key;
 use std::rc::Rc;
 use std::cell::RefCell;
+use opengl_graphics::Texture;
+use super::texture_loader::Texture_Loader;
+use super::animator::Animator;
 
 pub struct Character {
     pub moving_object: Moving_Object,
-    current_state: CharacterState,
     pub key_pressed_map: Rc<RefCell<HashMap<Key, bool>>>,
     pub pressed_left: bool,
     pub pressed_right: bool,
     pub pressed_jump: bool,
+    current_state: CharacterState,
+    idle_animator: Animator
 }
 
 impl Character {
-    pub fn new(key_map: Rc<RefCell<HashMap<Key, bool>>>) -> Character {
+    pub fn new(key_map: Rc<RefCell<HashMap<Key, bool>>>, tex_loader: Rc<Texture_Loader>) -> Character {
+        let mut textures = Vec::<Texture>::new();
+        for i in 1..10 {
+
+            let texture = tex_loader.load_texture(&format!("Character/Idle ({}).png", i));
+            textures.push(texture);
+        }
         Character { 
             moving_object: Moving_Object::new(
                 [0.0, 700.0],
@@ -29,7 +39,8 @@ impl Character {
             key_pressed_map: key_map,
             pressed_jump: false,
             pressed_left: false,
-            pressed_right: false
+            pressed_right: false,
+            idle_animator: Animator::new(textures, 0.1)
         }
     }
 
@@ -47,6 +58,7 @@ impl Character {
             CharacterState::GrabLedge => {}
         }
         self.moving_object.update_physics(delta);
+        self.idle_animator.next(delta);
     }
 
     fn handle_stand(&mut self, delta: f64) {
@@ -131,7 +143,8 @@ impl Renderable for Character {
                 .transform
                 .trans(character_x, character_y);
         
-        rectangle(color, square, point_trans, gl);
+        // rectangle(color, square, point_trans, gl);
+        self.idle_animator.render(ctx, gl, self.moving_object.position)
     }
 }
 
