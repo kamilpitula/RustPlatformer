@@ -18,7 +18,13 @@ pub struct Character {
 impl Character {
     pub fn new(key_map: Rc<RefCell<HashMap<Key, bool>>>) -> Character {
         Character { 
-            moving_object: Moving_Object::new([0.0, 700.0], [10.0, 10.0], [0.0, 1080.0]),
+            moving_object: Moving_Object::new(
+                [0.0, 700.0],
+                [10.0, 10.0],
+                [0.0, 1080.0],
+                config::ACCELERATION,
+                config::WALK_SPEED,
+                config::JUMP_SPEED),
             current_state: CharacterState::Stand,
             key_pressed_map: key_map,
             pressed_jump: false,
@@ -51,7 +57,7 @@ impl Character {
             self.current_state = CharacterState::Walk
         }
         else if self.pressed_jump {
-            self.moving_object.speed = add(self.moving_object.speed, [0.0, -config::JUMP_SPEED]);
+            self.moving_object.jump();
             self.current_state = CharacterState::Jump;
         }
         else {
@@ -62,22 +68,21 @@ impl Character {
     fn handle_walk(&mut self, delta: f64) {
         if self.pressed_right {
             if self.moving_object.pushes_left_wall {
-                self.moving_object.speed = [0.0, 0.0];
+                self.moving_object.stop();
             } else {
-                self.moving_object.acceleration = [config::ACCELERATION, 0.0];
+                self.moving_object.move_right(1.0);
             }
         }
         else if self.pressed_left {
             if self.moving_object.pushes_left_wall {
-                self.moving_object.speed = [0.0, 0.0];
+                self.moving_object.stop();
             } else {
-                self.moving_object.acceleration = [-config::ACCELERATION, 0.0];
+                self.moving_object.move_left(1.0);
             }
         }
 
         if self.pressed_jump {
-            self.moving_object.speed
-             = add(self.moving_object.speed, [0.0, -config::JUMP_SPEED]);
+            self.moving_object.jump();
             self.current_state = CharacterState::Jump;
         }
         else {
@@ -89,6 +94,20 @@ impl Character {
         self.moving_object.speed[1] += config::GRAVITY * delta;
         if self.moving_object.on_ground {
             self.current_state = CharacterState::Stand;
+        }
+        if self.pressed_right {
+            if self.moving_object.pushes_left_wall {
+                self.moving_object.stop();
+            } else {
+                self.moving_object.move_right(0.7);
+            }
+        }
+        else if self.pressed_left {
+            if self.moving_object.pushes_left_wall {
+                self.moving_object.stop();
+            } else {
+                self.moving_object.move_left(0.7);
+            }
         }
     }
 }

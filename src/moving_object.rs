@@ -26,11 +26,14 @@ pub struct Moving_Object{
     pub was_at_ceiling: bool,
     pub at_ceiling: bool,
 
-    bounds: Vec2d
+    bounds: Vec2d,
+    accelerate: f64,
+    max_speed: f64,
+    jump_speed: f64
 }
 
 impl Moving_Object {
-    pub fn new(position: Vec2d, size: Vec2d, bounds: Vec2d) -> Moving_Object {
+    pub fn new(position: Vec2d, size: Vec2d, bounds: Vec2d, accelerate: f64, max_speed: f64, jump_speed: f64) -> Moving_Object {
         Moving_Object{
             position: position,
             old_position: [0.0, 0.0],
@@ -49,7 +52,10 @@ impl Moving_Object {
             at_ceiling: false,
             aabb: AABB::new(position, mul_scalar(size, 2.0)),
             aabb_offset: mul_scalar(size, 2.0),
-            bounds: bounds
+            bounds: bounds,
+            accelerate: accelerate,
+            max_speed: max_speed,
+            jump_speed: jump_speed
         }
     }
 
@@ -81,13 +87,29 @@ impl Moving_Object {
     }
 
     fn limit_walk_speed(&mut self, calculated_speed: Vec2d) {
-        if calculated_speed[0] > config::WALK_SPEED {
-            self.speed = [config::WALK_SPEED, self.speed[1]];
-        } else if calculated_speed[0] < -config::WALK_SPEED {
-            self.speed = [-config::WALK_SPEED, self.speed[1]];
+        if calculated_speed[0] > self.max_speed {
+            self.speed = [self.max_speed, self.speed[1]];
+        } else if calculated_speed[0] < -self.max_speed {
+            self.speed = [-self.max_speed, self.speed[1]];
         } else {
             self.speed = calculated_speed;
         }
+    }
+
+    pub fn stop(&mut self) {
+        self.speed = [0.0, 0.0];
+    }
+
+    pub fn jump(&mut self) {
+        self.speed = add(self.speed, [0.0, -self.jump_speed]);
+    }
+
+    pub fn move_left(&mut self, factor: f64) {
+        self.acceleration = [-self.accelerate * factor, 0.0];
+    }
+
+    pub fn move_right(&mut self, factor: f64) {
+        self.acceleration = [self.accelerate * factor, 0.0];
     }
 
     pub fn update_physics(&mut self, delta: f64) {
