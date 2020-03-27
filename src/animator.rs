@@ -39,6 +39,8 @@ impl Animator {
         if mirror {
             transform = transform.flip_h();
         }
-        image(&self.sprites[self.current_sprite], transform, gl);
+        let sprite = &self.sprites[self.current_sprite];
+        let size = sprite.get_size();
+        image(sprite, transform, gl);
     }
 }

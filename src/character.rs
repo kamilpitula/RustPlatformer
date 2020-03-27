@@ -4,8 +4,10 @@ use std::collections::HashMap;
 use piston::input::keyboard::Key;
 use std::rc::Rc;
 use std::cell::RefCell;
+use piston_window::rectangle;
 use super::texture_loader::Texture_Loader;
 use super::animation_manager::AnimationManager;
+use super::colors;
 
 pub struct Character {
     pub moving_object: Moving_Object,
@@ -30,7 +32,7 @@ impl Character {
         Character { 
             moving_object: Moving_Object::new(
                 [0.0, 700.0],
-                [10.0, 10.0],
+                [30.0, 50.0],
                 [0.0, 1080.0],
                 config::ACCELERATION,
                 config::WALK_SPEED,
@@ -148,6 +150,21 @@ use graphics::Context;
 
 impl Renderable for Character {
     fn render(&mut self, ctx: &Context, gl: &mut GlGraphics) {
+        use graphics::*;
+
+        let mut color = colors::BLUE;	
+
+        let character_x = self.moving_object.position[0];	
+        let character_y = self.moving_object.position[1];	
+
+        // let square = rectangle::centered(0.0, 0.0, self.moving_object.aabb.half_size[0], self.moving_object.aabb.half_size[1]);	
+
+        let point_trans = ctx	
+                .transform	
+                .trans(character_x, character_y);
+
+        rectangle(color, [0.0, 0.0, self.moving_object.aabb.half_size[0] * 2.0, self.moving_object.aabb.half_size[1] * 2.0], point_trans, gl);
+        
         self.animation_manager
             .get_animator(self.current_animator.to_string())
             .render(ctx, gl, self.moving_object.position, self.turned_back)
