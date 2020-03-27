@@ -27,6 +27,7 @@ impl Character {
         let mut animation_manager = AnimationManager::new(tex_loader);
         animation_manager.add_sequence("idle".to_string(), "Character/Idle", 0.1, 1, 10);
         animation_manager.add_sequence("run".to_string(), "Character/Run", 0.1, 1, 8);
+        animation_manager.add_sequence("jump".to_string(), "Character/Jump", 0.1, 1, 10);
 
         Character { 
             moving_object: Moving_Object::new(
@@ -60,7 +61,9 @@ impl Character {
             CharacterState::GrabLedge => {}
         }
 
-        if  self.moving_object.speed[0].abs() > 10.0 && self.moving_object.on_ground {
+        if  self.moving_object.speed[1].abs() > 10.0 && !self.moving_object.on_ground {
+            self.current_animator = "jump".to_string();
+        } else if  self.moving_object.speed[0].abs() > 10.0 && self.moving_object.on_ground {
             self.current_animator = "run".to_string();
         } else {
             self.current_animator = "idle".to_string();
