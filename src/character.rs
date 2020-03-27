@@ -1,13 +1,10 @@
 use super::moving_object::Moving_Object;
 use super::config;
-use graphics::math::*;
 use std::collections::HashMap;
 use piston::input::keyboard::Key;
 use std::rc::Rc;
 use std::cell::RefCell;
-use opengl_graphics::Texture;
 use super::texture_loader::Texture_Loader;
-use super::animator::Animator;
 use super::animation_manager::AnimationManager;
 
 pub struct Character {
@@ -60,14 +57,8 @@ impl Character {
             },
             CharacterState::GrabLedge => {}
         }
-
-        if  self.moving_object.speed[1].abs() > 10.0 && !self.moving_object.on_ground {
-            self.current_animator = "jump".to_string();
-        } else if  self.moving_object.speed[0].abs() > 10.0 && self.moving_object.on_ground {
-            self.current_animator = "run".to_string();
-        } else {
-            self.current_animator = "idle".to_string();
-        }
+        
+        self.select_animation();
         self.moving_object.update_physics(delta);
         self.animation_manager.get_animator(self.current_animator.to_string()).next(delta);
     }
@@ -133,17 +124,24 @@ impl Character {
             }
         }
     }
+
+    fn select_animation(&mut self) {
+        if  self.moving_object.speed[1].abs() > 10.0 && !self.moving_object.on_ground {
+            self.current_animator = "jump".to_string();
+        } else if  self.moving_object.speed[0].abs() > 10.0 && self.moving_object.on_ground {
+            self.current_animator = "run".to_string();
+        } else {
+            self.current_animator = "idle".to_string();
+        }
+    }
 }
 
 use super::renderable::Renderable;
 use opengl_graphics::GlGraphics;
-use super::colors;
 use graphics::Context;
 
 impl Renderable for Character {
     fn render(&mut self, ctx: &Context, gl: &mut GlGraphics) {
-        use graphics::*;
-        
         self.animation_manager.get_animator(self.current_animator.to_string()).render(ctx, gl, self.moving_object.position)
     }
 }
