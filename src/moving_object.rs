@@ -78,7 +78,7 @@ impl Moving_Object {
     }
 
     fn check_ground_collision(&mut self) {
-        if self.position[1] > 700.0 {
+        if self.position[1] >= 700.0 {
             self.position[1] = 700.0;
             self.on_ground = true;
         } else {

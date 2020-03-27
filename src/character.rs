@@ -16,17 +16,31 @@ pub struct Character {
     pub pressed_right: bool,
     pub pressed_jump: bool,
     current_state: CharacterState,
-    idle_animator: Animator
+    current_animator: String,
+    animators: HashMap<String, RefCell<Animator>>
 }
 
 impl Character {
     pub fn new(key_map: Rc<RefCell<HashMap<Key, bool>>>, tex_loader: Rc<Texture_Loader>) -> Character {
-        let mut textures = Vec::<Texture>::new();
+        let mut idle_textures = Vec::<Texture>::new();
         for i in 1..10 {
-
             let texture = tex_loader.load_texture(&format!("Character/Idle ({}).png", i));
-            textures.push(texture);
+            idle_textures.push(texture);
         }
+        let idle_animator = RefCell::new(Animator::new(idle_textures, 0.1));
+
+        let mut run_textures = Vec::<Texture>::new();
+        for i in 1..9 {
+            let texture = tex_loader.load_texture(&format!("Character/Run ({}).png", i));
+            run_textures.push(texture);
+        }
+        let run_animator = RefCell::new(Animator::new(run_textures, 0.1));
+
+        let mut animators_map = HashMap::<String, RefCell<Animator>>::new();
+
+        animators_map.insert("idle".to_string(), idle_animator);
+        animators_map.insert("run".to_string(), run_animator);
+
         Character { 
             moving_object: Moving_Object::new(
                 [0.0, 700.0],
@@ -40,7 +54,8 @@ impl Character {
             pressed_jump: false,
             pressed_left: false,
             pressed_right: false,
-            idle_animator: Animator::new(textures, 0.1)
+            animators: animators_map,
+            current_animator: "idle".to_string()
         }
     }
 
@@ -57,8 +72,14 @@ impl Character {
             },
             CharacterState::GrabLedge => {}
         }
+
+        if  self.moving_object.speed[0].abs() > 10.0 && self.moving_object.on_ground {
+            self.current_animator = "run".to_string();
+        } else {
+            self.current_animator = "idle".to_string();
+        }
         self.moving_object.update_physics(delta);
-        self.idle_animator.next(delta);
+        self.animators[&self.current_animator].borrow_mut().next(delta);
     }
 
     fn handle_stand(&mut self, delta: f64) {
@@ -66,7 +87,7 @@ impl Character {
             self.current_state = CharacterState::Jump;
         }
         if self.pressed_left | self.pressed_right {
-            self.current_state = CharacterState::Walk
+            self.current_state = CharacterState::Walk;
         }
         else if self.pressed_jump {
             self.moving_object.jump();
@@ -144,7 +165,7 @@ impl Renderable for Character {
                 .trans(character_x, character_y);
         
         // rectangle(color, square, point_trans, gl);
-        self.idle_animator.render(ctx, gl, self.moving_object.position)
+        self.animators[&self.current_animator].borrow_mut().render(ctx, gl, self.moving_object.position)
     }
 }
 
