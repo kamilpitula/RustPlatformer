@@ -8,6 +8,7 @@ use std::cell::RefCell;
 use opengl_graphics::Texture;
 use super::texture_loader::Texture_Loader;
 use super::animator::Animator;
+use super::animation_manager::AnimationManager;
 
 pub struct Character {
     pub moving_object: Moving_Object,
@@ -17,29 +18,15 @@ pub struct Character {
     pub pressed_jump: bool,
     current_state: CharacterState,
     current_animator: String,
-    animators: HashMap<String, RefCell<Animator>>
+    animation_manager: AnimationManager
 }
 
 impl Character {
     pub fn new(key_map: Rc<RefCell<HashMap<Key, bool>>>, tex_loader: Rc<Texture_Loader>) -> Character {
-        let mut idle_textures = Vec::<Texture>::new();
-        for i in 1..10 {
-            let texture = tex_loader.load_texture(&format!("Character/Idle ({}).png", i));
-            idle_textures.push(texture);
-        }
-        let idle_animator = RefCell::new(Animator::new(idle_textures, 0.1));
 
-        let mut run_textures = Vec::<Texture>::new();
-        for i in 1..9 {
-            let texture = tex_loader.load_texture(&format!("Character/Run ({}).png", i));
-            run_textures.push(texture);
-        }
-        let run_animator = RefCell::new(Animator::new(run_textures, 0.1));
-
-        let mut animators_map = HashMap::<String, RefCell<Animator>>::new();
-
-        animators_map.insert("idle".to_string(), idle_animator);
-        animators_map.insert("run".to_string(), run_animator);
+        let mut animation_manager = AnimationManager::new(tex_loader);
+        animation_manager.add_sequence("idle".to_string(), "Character/Idle", 0.1, 1, 10);
+        animation_manager.add_sequence("run".to_string(), "Character/Run", 0.1, 1, 8);
 
         Character { 
             moving_object: Moving_Object::new(
@@ -54,8 +41,8 @@ impl Character {
             pressed_jump: false,
             pressed_left: false,
             pressed_right: false,
-            animators: animators_map,
-            current_animator: "idle".to_string()
+            current_animator: "idle".to_string(),
+            animation_manager: animation_manager
         }
     }
 
@@ -79,7 +66,7 @@ impl Character {
             self.current_animator = "idle".to_string();
         }
         self.moving_object.update_physics(delta);
-        self.animators[&self.current_animator].borrow_mut().next(delta);
+        self.animation_manager.get_animator(self.current_animator.to_string()).next(delta);
     }
 
     fn handle_stand(&mut self, delta: f64) {
@@ -153,19 +140,8 @@ use graphics::Context;
 impl Renderable for Character {
     fn render(&mut self, ctx: &Context, gl: &mut GlGraphics) {
         use graphics::*;
-        let mut color = colors::BLUE;
-
-        let character_x = self.moving_object.position[0];
-        let character_y = self.moving_object.position[1];
-
-        let square = rectangle::square(0.0, 0.0, 25.0);
-
-        let point_trans = ctx
-                .transform
-                .trans(character_x, character_y);
         
-        // rectangle(color, square, point_trans, gl);
-        self.animators[&self.current_animator].borrow_mut().render(ctx, gl, self.moving_object.position)
+        self.animation_manager.get_animator(self.current_animator.to_string()).render(ctx, gl, self.moving_object.position)
     }
 }
 

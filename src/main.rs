@@ -29,6 +29,7 @@ mod config;
 mod renderable;
 mod textwriter;
 mod AABB;
+mod animation_manager;
 mod moving_object;
 mod first_level;
 mod texture_loader;
