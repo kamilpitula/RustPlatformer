@@ -32,10 +32,13 @@ impl Animator {
         }
     }
 
-    pub fn render(&mut self, ctx: &Context, gl: &mut GlGraphics, position: Vec2d){
+    pub fn render(&mut self, ctx: &Context, gl: &mut GlGraphics, position: Vec2d, mirror: bool){
         use graphics::*;
 
-        let transform = ctx.transform.trans(position[0] - 10.0, position[1] - 27.0).scale(0.1, 0.1);
+        let mut transform = ctx.transform.trans(position[0] - 10.0, position[1] - 27.0).scale(0.1, 0.1);
+        if mirror {
+            transform = transform.flip_h();
+        }
         image(&self.sprites[self.current_sprite], transform, gl);
     }
 }

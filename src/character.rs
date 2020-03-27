@@ -15,7 +15,8 @@ pub struct Character {
     pub pressed_jump: bool,
     current_state: CharacterState,
     current_animator: String,
-    animation_manager: AnimationManager
+    animation_manager: AnimationManager,
+    turned_back: bool
 }
 
 impl Character {
@@ -40,7 +41,8 @@ impl Character {
             pressed_left: false,
             pressed_right: false,
             current_animator: "idle".to_string(),
-            animation_manager: animation_manager
+            animation_manager: animation_manager,
+            turned_back: false
         }
     }
 
@@ -81,13 +83,15 @@ impl Character {
 
     fn handle_walk(&mut self, delta: f64) {
         if self.pressed_right {
-            if self.moving_object.pushes_left_wall {
+            self.turned_back = false;
+            if self.moving_object.pushes_right_wall {
                 self.moving_object.stop();
             } else {
                 self.moving_object.move_right(1.0);
             }
         }
         else if self.pressed_left {
+            self.turned_back = true;
             if self.moving_object.pushes_left_wall {
                 self.moving_object.stop();
             } else {
@@ -110,6 +114,7 @@ impl Character {
             self.current_state = CharacterState::Stand;
         }
         if self.pressed_right {
+            self.turned_back = false;
             if self.moving_object.pushes_left_wall {
                 self.moving_object.stop();
             } else {
@@ -117,6 +122,7 @@ impl Character {
             }
         }
         else if self.pressed_left {
+            self.turned_back = true;
             if self.moving_object.pushes_left_wall {
                 self.moving_object.stop();
             } else {
@@ -142,7 +148,9 @@ use graphics::Context;
 
 impl Renderable for Character {
     fn render(&mut self, ctx: &Context, gl: &mut GlGraphics) {
-        self.animation_manager.get_animator(self.current_animator.to_string()).render(ctx, gl, self.moving_object.position)
+        self.animation_manager
+            .get_animator(self.current_animator.to_string())
+            .render(ctx, gl, self.moving_object.position, self.turned_back)
     }
 }
 
