@@ -62,12 +62,12 @@ impl Character {
             CharacterState::GrabLedge => {}
         }
         
-        self.select_animation();
         self.moving_object.update_physics(delta);
         self.animation_manager.get_animator(self.current_animator.to_string()).next(delta);
     }
 
     fn handle_stand(&mut self, delta: f64) {
+        self.current_animator = "idle".to_string();
         if !self.moving_object.on_ground {
             self.current_state = CharacterState::Jump;
         }
@@ -84,6 +84,7 @@ impl Character {
     }
 
     fn handle_walk(&mut self, delta: f64) {
+        self.current_animator = "run".to_string();
         if self.pressed_right {
             self.turned_back = false;
             if self.moving_object.pushes_right_wall {
@@ -99,18 +100,18 @@ impl Character {
             } else {
                 self.moving_object.move_left(1.0);
             }
+        } else {
+            self.current_state = CharacterState::Stand;
         }
 
         if self.pressed_jump {
             self.moving_object.jump();
             self.current_state = CharacterState::Jump;
         }
-        else {
-            self.current_state = CharacterState::Stand;
-        }
     }
 
     fn handle_jump(&mut self, delta: f64) {
+        self.current_animator = "jump".to_string();
         self.moving_object.speed[1] += config::GRAVITY * delta;
         if self.moving_object.on_ground {
             self.current_state = CharacterState::Stand;
@@ -132,16 +133,6 @@ impl Character {
             }
         }
     }
-
-    fn select_animation(&mut self) {
-        if  self.moving_object.speed[1].abs() > 10.0 && !self.moving_object.on_ground {
-            self.current_animator = "jump".to_string();
-        } else if  self.moving_object.speed[0].abs() > 10.0 && self.moving_object.on_ground {
-            self.current_animator = "run".to_string();
-        } else {
-            self.current_animator = "idle".to_string();
-        }
-    }
 }
 
 use super::renderable::Renderable;
@@ -156,8 +147,6 @@ impl Renderable for Character {
 
         let character_x = self.moving_object.position[0];	
         let character_y = self.moving_object.position[1];	
-
-        // let square = rectangle::centered(0.0, 0.0, self.moving_object.aabb.half_size[0], self.moving_object.aabb.half_size[1]);	
 
         let point_trans = ctx	
                 .transform	

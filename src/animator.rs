@@ -35,12 +35,15 @@ impl Animator {
     pub fn render(&mut self, ctx: &Context, gl: &mut GlGraphics, position: Vec2d, mirror: bool){
         use graphics::*;
 
-        let mut transform = ctx.transform.trans(position[0] - 10.0, position[1] - 27.0).scale(0.1, 0.1);
+        let sprite = &self.sprites[self.current_sprite];
+        let size = sprite.get_size();
+        let scale = 0.1;
+
+        let mut transform = ctx.transform.trans(position[0] - (size.0 / 2 ) as f64 * scale, position[1] - (size.1 / 2) as f64 * scale).scale(0.1, 0.1);
         if mirror {
             transform = transform.flip_h();
         }
-        let sprite = &self.sprites[self.current_sprite];
-        let size = sprite.get_size();
+        
         image(sprite, transform, gl);
     }
 }
