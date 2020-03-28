@@ -37,6 +37,7 @@ mod camera;
 mod background;
 mod character;
 mod animator;
+mod map;
 
 fn main() {
     let opengl = OpenGL::V3_2;
