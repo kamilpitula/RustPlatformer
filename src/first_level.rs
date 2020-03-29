@@ -15,6 +15,7 @@ use super::texture_loader::Texture_Loader;
 use super::background::Background;
 use super::character::Character;
 use super::camera::{Camera, camera_dependent_object};
+use super::map::{Map, TileType};
 use std::collections::HashMap;
 
 pub struct first_level{
@@ -23,12 +24,14 @@ pub struct first_level{
     key_press: Rc<RefCell<HashMap<Key,bool>>>,
     objects: Vec<Box<camera_dependent_object>>,
     camera: Camera,
+    map: Rc<Map>
 }
 
 impl first_level {
     pub fn new(texture_loader: Rc<Texture_Loader>) -> first_level {
         let background_texture = texture_loader.load_texture("City Background.png");
         let foreground_texture = texture_loader.load_texture("City Foreground.png");
+
         let mut key_press = Rc::new(RefCell::new(HashMap::new()));
         (*key_press.borrow_mut()).insert(Key::Left, false); 
         (*key_press.borrow_mut()).insert(Key::Right, false); 
@@ -36,12 +39,15 @@ impl first_level {
         (*key_press.borrow_mut()).insert(Key::A, false); 
         (*key_press.borrow_mut()).insert(Key::D, false); 
 
+        let map = Rc::new(Map::new(vec![vec![TileType::Block]], [0.0, 100.0], 10, 10, 25.0));
+
         first_level {
             background: Background::new(background_texture, foreground_texture, 2, 1000.0),
-            character: Character::new(Rc::clone(&key_press), Rc::clone(&texture_loader)),
+            character: Character::new(Rc::clone(&key_press), Rc::clone(&texture_loader), Rc::clone(&map)),
             camera: Camera::new(460.0, 660.0),
             objects: Vec::new(),
             key_press: key_press,
+            map: map
         }
     }
 }

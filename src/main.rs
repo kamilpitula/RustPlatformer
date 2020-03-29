@@ -14,6 +14,7 @@ use piston::input::{RenderEvent, PressEvent, UpdateEvent};
 use piston::window::*;
 use piston_window::*;
 use gamestate::GameState;
+use map::Map;
 use texture_loader::Texture_Loader;
 use states::State;
 use std::rc::Rc;

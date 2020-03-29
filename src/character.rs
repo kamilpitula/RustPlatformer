@@ -8,6 +8,7 @@ use piston_window::rectangle;
 use super::texture_loader::Texture_Loader;
 use super::animation_manager::AnimationManager;
 use super::colors;
+use super::map::Map;
 
 pub struct Character {
     pub moving_object: Moving_Object,
@@ -18,11 +19,12 @@ pub struct Character {
     current_state: CharacterState,
     current_animator: String,
     animation_manager: AnimationManager,
-    turned_back: bool
+    turned_back: bool,
+    map: Rc<Map>
 }
 
 impl Character {
-    pub fn new(key_map: Rc<RefCell<HashMap<Key, bool>>>, tex_loader: Rc<Texture_Loader>) -> Character {
+    pub fn new(key_map: Rc<RefCell<HashMap<Key, bool>>>, tex_loader: Rc<Texture_Loader>, map: Rc<Map>) -> Character {
 
         let mut animation_manager = AnimationManager::new(tex_loader);
         animation_manager.add_sequence("idle".to_string(), "Character/Idle", 0.1, 1, 10);
@@ -36,7 +38,8 @@ impl Character {
                 [0.0, 1080.0],
                 config::ACCELERATION,
                 config::WALK_SPEED,
-                config::JUMP_SPEED),
+                config::JUMP_SPEED,
+                Rc::clone(&map)),
             current_state: CharacterState::Stand,
             key_pressed_map: key_map,
             pressed_jump: false,
@@ -44,7 +47,8 @@ impl Character {
             pressed_right: false,
             current_animator: "idle".to_string(),
             animation_manager: animation_manager,
-            turned_back: false
+            turned_back: false,
+            map: map
         }
     }
 

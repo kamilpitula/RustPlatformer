@@ -1,6 +1,8 @@
 use graphics::math::*;
 use super::AABB::AABB;
 use super::config;
+use super::Map;
+use std::rc::Rc;
 
 pub struct Moving_Object{
     pub old_position: Vec2d,
@@ -29,11 +31,12 @@ pub struct Moving_Object{
     bounds: Vec2d,
     accelerate: f64,
     max_speed: f64,
-    jump_speed: f64
+    jump_speed: f64,
+    map: Rc<Map>
 }
 
 impl Moving_Object {
-    pub fn new(position: Vec2d, size: Vec2d, bounds: Vec2d, accelerate: f64, max_speed: f64, jump_speed: f64) -> Moving_Object {
+    pub fn new(position: Vec2d, size: Vec2d, bounds: Vec2d, accelerate: f64, max_speed: f64, jump_speed: f64, map: Rc<Map>) -> Moving_Object {
         Moving_Object{
             position: position,
             old_position: [0.0, 0.0],
@@ -55,7 +58,8 @@ impl Moving_Object {
             bounds: bounds,
             accelerate: accelerate,
             max_speed: max_speed,
-            jump_speed: jump_speed
+            jump_speed: jump_speed,
+            map: map
         }
     }
 
@@ -78,8 +82,12 @@ impl Moving_Object {
     }
 
     fn check_ground_collision(&mut self) {
-        if self.position[1] >= 700.0 {
-            self.position[1] = 700.0;
+        let groundY = 700.0;
+        let (has_ground, calculated_ground) = self.has_ground(self.old_position, self.position, self.speed);
+
+        if self.speed[1] >= 0.0 && has_ground {
+            self.position[1] = calculated_ground + self.aabb.half_size[1] - self.aabb_offset[1];
+            self.speed[1] = 0.0;
             self.on_ground = true;
         } else {
             self.on_ground = false;
@@ -135,7 +143,7 @@ impl Moving_Object {
         self.aabb.center = add(self.position, self.aabb_offset);
     }
 
-    pub fn has_ground(&self, oldPosition: Vec2d, position: Vec2d, speed: Vec2d) -> bool {
+    pub fn has_ground(&self, oldPosition: Vec2d, position: Vec2d, speed: Vec2d) -> (bool, f64) {
         let center = add(position, self.aabb_offset);
         let bottomLeft = sub(center, self.aabb.half_size);
         let bottomRight = [bottomLeft[0] + self.aabb.half_size[0] * 2.0 - 2.0, bottomLeft[1]];
@@ -144,8 +152,18 @@ impl Moving_Object {
 
         while checkedTile[0] < bottomRight[0] {
             checkedTile[0] = checkedTile[0].min(bottomRight[0]);
+            let tileIndexX = self.map.get_map_tileX_at_point(checkedTile[0]);
+            let tileIndexY = self.map.get_map_tileY_at_point(checkedTile[1]); 
+
+            let groundY = tileIndexY as f64 * self.map.tileSize + self.map.tileSize / 2.0 + self.map.position[1];
+            if self.map.is_obstacle(tileIndexX, tileIndexY){
+                return (true,  groundY);
+            }
+            if checkedTile[0] > bottomRight[0] {
+                break;
+            }
         }
-        true
+        (false, 0.0)
     }
 
     
