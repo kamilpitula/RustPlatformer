@@ -1,4 +1,5 @@
 use graphics::math::*;
+use super::config;
 
 #[derive(Copy, Clone, PartialEq)]
 pub enum TileType {
@@ -16,6 +17,17 @@ pub struct Map {
 }
 
 impl Map {
+
+   pub fn new(tiles: Vec<Vec<TileType>>, position: Vec2d, width: i8, height: i8, tileSize: f64) -> Map {
+    Map {
+        tiles: tiles,
+        position: position,
+        width: width,
+        height: height,
+        tileSize: tileSize
+    }
+   }
+ 
    pub fn get_map_tile_in_point(&self, point: Vec2d) -> (i8, i8) {
         let x = (point[0] - self.position[0] + (self.tileSize / 2.0)) / self.tileSize;
         let y = (point[1] - self.position[1] + (self.tileSize / 2.0)) / self.tileSize;
@@ -75,8 +87,3 @@ impl Map {
    }
 
 }
-
-
-
-
-

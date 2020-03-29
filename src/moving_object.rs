@@ -135,5 +135,18 @@ impl Moving_Object {
         self.aabb.center = add(self.position, self.aabb_offset);
     }
 
+    pub fn has_ground(&self, oldPosition: Vec2d, position: Vec2d, speed: Vec2d) -> bool {
+        let center = add(position, self.aabb_offset);
+        let bottomLeft = sub(center, self.aabb.half_size);
+        let bottomRight = [bottomLeft[0] + self.aabb.half_size[0] * 2.0 - 2.0, bottomLeft[1]];
+
+        let mut checkedTile = bottomLeft;
+
+        while checkedTile[0] < bottomRight[0] {
+            checkedTile[0] = checkedTile[0].min(bottomRight[0]);
+        }
+        true
+    }
+
     
 }
