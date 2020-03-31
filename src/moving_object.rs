@@ -162,6 +162,7 @@ impl Moving_Object {
             if checkedTile[0] > bottomRight[0] {
                 break;
             }
+            checkedTile[0] = checkedTile[0] + self.map.tileSize;
         }
         (false, 0.0)
     }

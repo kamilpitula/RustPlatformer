@@ -17,6 +17,7 @@ use super::character::Character;
 use super::camera::{Camera, camera_dependent_object};
 use super::map::{Map, TileType};
 use std::collections::HashMap;
+use super::map_loader::MapLoader;
 
 pub struct first_level{
     background: Background,
@@ -28,7 +29,7 @@ pub struct first_level{
 }
 
 impl first_level {
-    pub fn new(texture_loader: Rc<Texture_Loader>) -> first_level {
+    pub fn new(texture_loader: Rc<Texture_Loader>, map_loader: Rc<MapLoader>) -> first_level {
         let background_texture = texture_loader.load_texture("City Background.png");
         let foreground_texture = texture_loader.load_texture("City Foreground.png");
 
@@ -39,7 +40,7 @@ impl first_level {
         (*key_press.borrow_mut()).insert(Key::A, false); 
         (*key_press.borrow_mut()).insert(Key::D, false); 
 
-        let map = Rc::new(Map::new(vec![vec![TileType::Block]], [0.0, 100.0], 10, 10, 25.0));
+        let map = Rc::new(Map::new(map_loader.load_map("level.map"), [0.0, 100.0], 10, 10, 25.0));
 
         first_level {
             background: Background::new(background_texture, foreground_texture, 2, 1000.0),

@@ -15,6 +15,7 @@ use piston::window::*;
 use piston_window::*;
 use gamestate::GameState;
 use map::Map;
+use map_loader::MapLoader;
 use texture_loader::Texture_Loader;
 use states::State;
 use std::rc::Rc;
@@ -39,6 +40,7 @@ mod background;
 mod character;
 mod animator;
 mod map;
+mod map_loader;
 
 fn main() {
     let opengl = OpenGL::V3_2;
@@ -54,8 +56,9 @@ fn main() {
                 .unwrap());
     
     let texture_loader = Rc::new(Texture_Loader::new(Rc::clone(&assets)));
+    let map_loader = Rc::new(MapLoader::new(Rc::clone(&assets)));
 
-    let mut current_state: Box<dyn GameState> = Box::new(first_level::first_level::new(Rc::clone(&texture_loader)));
+    let mut current_state: Box<dyn GameState> = Box::new(first_level::first_level::new(Rc::clone(&texture_loader), Rc::clone(&map_loader)));
 
     let mut events = get_events_loop();
     let mut glyph_cache = get_font(Rc::clone(&assets));
