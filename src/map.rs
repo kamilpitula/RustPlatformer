@@ -90,4 +90,9 @@ impl Map {
     return self.tiles[x as usize][y as usize] == TileType::Empty;
    }
 
+   pub fn change_position(&mut self, x: f64, y: f64) {
+       self.position[0] = self.position[0] + x;
+       self.position[1] = self.position[1] + y;
+   }
+
 }

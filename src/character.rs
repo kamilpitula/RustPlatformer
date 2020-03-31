@@ -19,12 +19,11 @@ pub struct Character {
     current_state: CharacterState,
     current_animator: String,
     animation_manager: AnimationManager,
-    turned_back: bool,
-    map: Rc<Map>
+    turned_back: bool
 }
 
 impl Character {
-    pub fn new(key_map: Rc<RefCell<HashMap<Key, bool>>>, tex_loader: Rc<Texture_Loader>, map: Rc<Map>) -> Character {
+    pub fn new(key_map: Rc<RefCell<HashMap<Key, bool>>>, tex_loader: Rc<Texture_Loader>) -> Character {
 
         let mut animation_manager = AnimationManager::new(tex_loader);
         animation_manager.add_sequence("idle".to_string(), "Character/Idle", 0.1, 1, 10);
@@ -38,8 +37,7 @@ impl Character {
                 [0.0, 1080.0],
                 config::ACCELERATION,
                 config::WALK_SPEED,
-                config::JUMP_SPEED,
-                Rc::clone(&map)),
+                config::JUMP_SPEED),
             current_state: CharacterState::Stand,
             key_pressed_map: key_map,
             pressed_jump: false,
@@ -48,11 +46,10 @@ impl Character {
             current_animator: "idle".to_string(),
             animation_manager: animation_manager,
             turned_back: false,
-            map: map
         }
     }
 
-    pub fn character_update(&mut self, delta: f64){
+    pub fn character_update(&mut self, delta: f64, map: &Map){
         match &self.current_state {
             CharacterState::Stand => {
                 self.handle_stand(delta);
@@ -66,7 +63,7 @@ impl Character {
             CharacterState::GrabLedge => {}
         }
         
-        self.moving_object.update_physics(delta);
+        self.moving_object.update_physics(delta, &map);
         self.animation_manager.get_animator(self.current_animator.to_string()).next(delta);
     }
 

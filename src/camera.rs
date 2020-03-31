@@ -1,5 +1,6 @@
 use super::character::Character;
 use super::background::Background;
+use super::map::Map;
 
 pub struct Camera {
     min: f64,
@@ -14,7 +15,7 @@ impl Camera{
         }
     }
 
-    pub fn update(&mut self, objects: &mut Vec<Box<camera_dependent_object>>, character: &mut Character, background: &mut Background, delta: f64) {
+    pub fn update(&mut self, objects: &mut Vec<Box<camera_dependent_object>>, map: &mut Map, character: &mut Character, background: &mut Background, delta: f64) {
         if character.moving_object.position[0] <= self.min {
             if background.x >= 0.0 {
                 return;
@@ -22,6 +23,7 @@ impl Camera{
             character.moving_object.position[0] = self.min;
             let move_x = delta * character.moving_object.speed[0];
             background.move_object(-move_x, 0.0);
+            map.change_position(-move_x, 0.0);
         }
 
         if character.moving_object.position[0] >= self.max {
@@ -31,6 +33,7 @@ impl Camera{
             character.moving_object.position[0] = self.max;
             let move_x = delta * character.moving_object.speed[0];
             background.move_object(-move_x, 0.0);
+            map.change_position(-move_x, 0.0);
         }
     }
 }

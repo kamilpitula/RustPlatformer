@@ -26,7 +26,7 @@ pub struct first_level{
     key_press: Rc<RefCell<HashMap<Key,bool>>>,
     objects: Vec<Box<camera_dependent_object>>,
     camera: Camera,
-    map: Rc<Map>
+    map: Map
 }
 
 impl first_level {
@@ -41,11 +41,11 @@ impl first_level {
         (*key_press.borrow_mut()).insert(Key::A, false); 
         (*key_press.borrow_mut()).insert(Key::D, false); 
 
-        let map = Rc::new(Map::new(map_loader.load_map("level.map"), [0.0, 100.0], 10, 10, 25.0));
+        let map = Map::new(map_loader.load_map("level.map"), [0.0, 100.0], 10, 10, 25.0);
 
         first_level {
             background: Background::new(background_texture, foreground_texture, 2, 1000.0),
-            character: Character::new(Rc::clone(&key_press), Rc::clone(&texture_loader), Rc::clone(&map)),
+            character: Character::new(Rc::clone(&key_press), Rc::clone(&texture_loader)),
             camera: Camera::new(460.0, 660.0),
             objects: Vec::new(),
             key_press: key_press,
@@ -80,8 +80,8 @@ impl GameState for first_level{
     }
 
     fn update(&mut self, args: &UpdateArgs) -> State<GameData> {
-            self.character.character_update(args.dt);
-            self.camera.update(&mut self.objects, &mut self.character, &mut self.background, args.dt);
+            self.character.character_update(args.dt, &self.map);
+            self.camera.update(&mut self.objects, &mut self.map, &mut self.character, &mut self.background, args.dt);
             return State::None;
     }
 
