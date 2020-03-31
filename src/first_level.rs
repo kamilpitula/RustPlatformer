@@ -18,6 +18,7 @@ use super::camera::{Camera, camera_dependent_object};
 use super::map::{Map, TileType};
 use std::collections::HashMap;
 use super::map_loader::MapLoader;
+use super::colors;
 
 pub struct first_level{
     background: Background,
@@ -51,11 +52,30 @@ impl first_level {
             map: map
         }
     }
+
+    fn render_map(&mut self, ctx: &Context, gl: &mut GlGraphics) {
+        use graphics::*;
+
+        let mut color = colors::BLUE;	
+
+        for (i, columns) in self.map.tiles.iter().enumerate() {
+            for (k, tile) in columns.iter().enumerate() {
+                if *tile == TileType::Block {
+                    let y = self.map.tileSize * i as f64 + self.map.position[1];
+                    let x = self.map.tileSize * k as f64 + self.map.position[0];
+
+                    let point_trans = ctx.transform.trans(x, y);
+                    rectangle(color, [0.0, 0.0, self.map.tileSize, self.map.tileSize], point_trans, gl);
+                }
+            }
+        }
+    }
 }
 
 impl GameState for first_level{
     fn render(&mut self, ctx: &Context, mut gl: &mut GlGraphics, glyphs: &mut GlyphCache){
         self.background.render(&ctx, &mut gl);
+        self.render_map(&ctx, &mut gl);
         self.character.render(&ctx, &mut gl);
     }
 

@@ -13,29 +13,11 @@ pub enum TileType {
 }
 
 pub struct Map {
-    tiles: Vec<Vec<TileType>>,
+    pub tiles: Vec<Vec<TileType>>,
     pub position: Vec2d,
     width: i8,
     height: i8,
     pub tileSize: f64
-}
-
-impl Renderable for Map {
-    fn render(&mut self, ctx: &Context, gl: &mut GlGraphics) {
-        use graphics::*;
-
-        let mut color = colors::BLUE;	
-
-        for (i, columns) in self.tiles.iter().enumerate() {
-            for (k, tile) in columns.iter().enumerate() {
-                let y = self.tileSize * i as f64 + self.position[1];
-                let x = self.tileSize * k as f64 + self.position[0];
-
-                let point_trans = ctx.transform.trans(x, y);
-                rectangle(color, [0.0, 0.0, self.tileSize, self.tileSize], point_trans, gl);
-            }
-        }
-    }
 }
 
 impl Map {
