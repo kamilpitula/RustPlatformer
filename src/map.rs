@@ -65,29 +65,29 @@ impl Map {
     if x < 0 || x >= self.width || y < 0 || y >= self.height {
         return true;
     }
-    return self.tiles[x as usize][y as usize] == TileType::Block;
+    return self.tiles[y as usize][x as usize] == TileType::Block;
    }
 
    pub fn is_ground(&self, x: i8, y: i8) -> bool {
     if x < 0 || x >= self.width || y < 0 || y >= self.height {
         return false;
     }
-    return self.tiles[x as usize][y as usize] == TileType::OneWay 
-        || self.tiles[x as usize][y as usize] == TileType::Block;
+    return self.tiles[y as usize][x as usize] == TileType::OneWay 
+        || self.tiles[y as usize][x as usize] == TileType::Block;
    }
 
    pub fn is_one_way_platform(&self, x: i8, y: i8) -> bool {
     if x < 0 || x >= self.width || y < 0 || y >= self.height {
         return false;
     }
-    return self.tiles[x as usize][y as usize] == TileType::OneWay;
+    return self.tiles[y as usize][x as usize] == TileType::OneWay;
    }
 
    pub fn is_empty(&self, x: i8, y: i8) -> bool {
     if x < 0 || x >= self.width || y < 0 || y >= self.height {
         return false;
     }
-    return self.tiles[x as usize][y as usize] == TileType::Empty;
+    return self.tiles[y as usize][x as usize] == TileType::Empty;
    }
 
    pub fn change_position(&mut self, x: f64, y: f64) {
@@ -101,7 +101,7 @@ impl Renderable for Map {
     fn render(&mut self, ctx: &Context, gl: &mut GlGraphics) {
         use graphics::*;
 
-        let mut color = colors::BLUE;	
+        let mut color = colors::DARK_GRAY;	
 
         for (i, columns) in self.tiles.iter().enumerate() {
             for (k, tile) in columns.iter().enumerate() {

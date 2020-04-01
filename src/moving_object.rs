@@ -39,7 +39,7 @@ impl Moving_Object {
         Moving_Object{
             position: position,
             old_position: [0.0, 0.0],
-            acceleration: [0.0, 0.0],
+            acceleration: [0.0, config::GRAVITY],
             old_accelaration: [0.0, 0.0],
             speed: [0.0, 0.0],
             old_speed: [0.0, 0.0],
@@ -80,11 +80,10 @@ impl Moving_Object {
     }
 
     fn check_ground_collision(&mut self, map: &Map) {
-        let groundY = 700.0;
         let (has_ground, calculated_ground) = self.has_ground(self.old_position, self.position, self.speed, &map);
 
         if self.speed[1] >= 0.0 && has_ground {
-            self.position[1] = calculated_ground + self.aabb.half_size[1] - self.aabb_offset[1];
+            self.position[1] = calculated_ground - self.aabb.half_size[1] * 2.0;//  - self.aabb_offset[1];
             self.speed[1] = 0.0;
             self.on_ground = true;
         } else {
@@ -111,11 +110,11 @@ impl Moving_Object {
     }
 
     pub fn move_left(&mut self, factor: f64) {
-        self.acceleration = [-self.accelerate * factor, 0.0];
+        self.acceleration = [-self.accelerate * factor, self.acceleration[1]];
     }
 
     pub fn move_right(&mut self, factor: f64) {
-        self.acceleration = [self.accelerate * factor, 0.0];
+        self.acceleration = [self.accelerate * factor, self.acceleration[1]];
     }
 
     pub fn update_physics(&mut self, delta: f64, map: &Map) {
@@ -131,38 +130,40 @@ impl Moving_Object {
         self.pushed_right_wall = self.pushes_right_wall;
         self.pushed_left_wall = self.pushes_left_wall;
         self.was_at_ceiling = self.at_ceiling;
-
-        self.position = add(self.position, mul_scalar(self.speed, delta));
-
+        
         self.check_left_wall_collision();
         self.check_right_wall_collision();
         self.check_ground_collision(&map);
         
         self.aabb.center = add(self.position, self.aabb_offset);
+        self.position = add(self.position, mul_scalar(self.speed, delta));
     }
 
     pub fn has_ground(&self, oldPosition: Vec2d, position: Vec2d, speed: Vec2d, map: &Map) -> (bool, f64) {
-        let center = add(position, self.aabb_offset);
-        let bottomLeft = sub(center, self.aabb.half_size);
-        let bottomRight = [bottomLeft[0] + self.aabb.half_size[0] * 2.0 - 2.0, bottomLeft[1]];
-
+        let (bottomRight, bottomLeft) = self.get_sensors(position);
         let mut checkedTile = bottomLeft;
 
         while checkedTile[0] < bottomRight[0] {
+
             checkedTile[0] = checkedTile[0].min(bottomRight[0]);
+
             let tileIndexX = map.get_map_tileX_at_point(checkedTile[0]);
             let tileIndexY = map.get_map_tileY_at_point(checkedTile[1]); 
+            checkedTile[0] = checkedTile[0] + map.tileSize;
 
-            let groundY = tileIndexY as f64 * map.tileSize + map.tileSize / 2.0 + map.position[1];
+            let groundY = tileIndexY as f64 * map.tileSize + map.position[1];
             if map.is_obstacle(tileIndexX, tileIndexY){
                 return (true,  groundY);
             }
-            if checkedTile[0] > bottomRight[0] {
-                break;
-            }
-            checkedTile[0] = checkedTile[0] + map.tileSize;
         }
         (false, 0.0)
+    }
+
+    fn get_sensors(&self, position: Vec2d) -> (Vec2d, Vec2d) {
+        let center = add(position, self.aabb.half_size);
+        let bottomRight = add(add(center, self.aabb.half_size), [1.0, 0.0]);
+        let bottomLeft = [bottomRight[0] - self.aabb.half_size[0] * 2.0 - 2.0, bottomRight[1]];
+        (bottomRight, bottomLeft)
     }
 
     

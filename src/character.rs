@@ -32,7 +32,7 @@ impl Character {
 
         Character { 
             moving_object: Moving_Object::new(
-                [0.0, 700.0],
+                [50.0, 300.0],
                 [30.0, 50.0],
                 [0.0, 1080.0],
                 config::ACCELERATION,
@@ -113,7 +113,6 @@ impl Character {
 
     fn handle_jump(&mut self, delta: f64) {
         self.current_animator = "jump".to_string();
-        self.moving_object.speed[1] += config::GRAVITY * delta;
         if self.moving_object.on_ground {
             self.current_state = CharacterState::Stand;
         }

@@ -41,7 +41,7 @@ impl first_level {
         (*key_press.borrow_mut()).insert(Key::A, false); 
         (*key_press.borrow_mut()).insert(Key::D, false); 
 
-        let map = Map::new(map_loader.load_map("level.map"), [0.0, 100.0], 10, 10, 25.0);
+        let map = Map::new(map_loader.load_map("level.map"), [0.0, 0.0], 40, 28, 24.0);
 
         first_level {
             background: Background::new(background_texture, foreground_texture, 2, 1000.0),
