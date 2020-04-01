@@ -93,9 +93,9 @@ impl Moving_Object {
 
     fn limit_walk_speed(&mut self, calculated_speed: Vec2d) {
         if calculated_speed[0] > self.max_speed {
-            self.speed = [self.max_speed, self.speed[1]];
+            self.speed = [self.max_speed, calculated_speed[1]];
         } else if calculated_speed[0] < -self.max_speed {
-            self.speed = [-self.max_speed, self.speed[1]];
+            self.speed = [-self.max_speed, calculated_speed[1]];
         } else {
             self.speed = calculated_speed;
         }
@@ -118,10 +118,9 @@ impl Moving_Object {
     }
 
     pub fn update_physics(&mut self, delta: f64, map: &Map) {
-
         self.old_position = self.position;
         self.old_speed = self.speed;
-
+ 
         let calculated_speed = add(self.speed, mul_scalar(self.acceleration, delta));
         self.limit_walk_speed(calculated_speed);
         self.acceleration[0] = self.speed[0] * -config::FRICTION;
