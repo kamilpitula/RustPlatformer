@@ -32,16 +32,33 @@ impl Animator {
         }
     }
 
-    pub fn render(&mut self, ctx: &Context, gl: &mut GlGraphics, position: Vec2d, mirror: bool){
+    pub fn render(&mut self, ctx: &Context, gl: &mut GlGraphics, position: Vec2d, box_size: Vec2d, mirror: bool){
         use graphics::*;
 
         let sprite = &self.sprites[self.current_sprite];
-        let size = sprite.get_size();
-        let scale = 0.1;
+        let sprite_size = sprite.get_size();
 
-        let mut transform = ctx.transform.trans(position[0] - (size.0 / 2 ) as f64 * scale, position[1] - (size.1 / 2) as f64 * scale).scale(0.1, 0.1);
+        let scale_x = box_size[0] / sprite_size.0 as f64;
+        let scale_y = box_size[1] / sprite_size.1 as f64;
+
+        let sprite_half_size_x = (sprite_size.0 / 2) as f64  * scale_x;
+        let sprite_size_x = sprite_half_size_x * 2.0;
+
+        let position_y = position[1];
+        let position_x = position[0] - sprite_half_size_x + (box_size[0] / 2.0);
+
+        let mut transform = ctx.transform
+            .trans(position_x, position_y)
+            .scale(scale_x, scale_y);
+        
         if mirror {
-            transform = transform.flip_h();
+            let mut flipped_transform = ctx.transform
+                .trans(position_x + sprite_size_x, position_y)
+                .scale(scale_x, scale_y);
+            
+            flipped_transform = flipped_transform.flip_h();
+            image(sprite, flipped_transform, gl);
+            return;
         }
         
         image(sprite, transform, gl);
