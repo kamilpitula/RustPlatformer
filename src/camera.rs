@@ -23,7 +23,7 @@ impl Camera{
             character.moving_object.position[0] = self.min;
             let move_x = delta * character.moving_object.speed[0];
             background.move_object(-move_x, 0.0);
-            map.change_position(-move_x, 0.0);
+            map.move_object(-move_x, 0.0);
         }
 
         if character.moving_object.position[0] >= self.max {
@@ -33,7 +33,7 @@ impl Camera{
             character.moving_object.position[0] = self.max;
             let move_x = delta * character.moving_object.speed[0];
             background.move_object(-move_x, 0.0);
-            map.change_position(-move_x, 0.0);
+            map.move_object(-move_x, 0.0);
         }
     }
 }

@@ -1,5 +1,6 @@
 use graphics::math::*;
 use super::config;
+use super::camera::camera_dependent_object;
 use super::renderable::Renderable;
 use super::colors;
 use opengl_graphics::GlGraphics;
@@ -89,12 +90,6 @@ impl Map {
     }
     return self.tiles[y as usize][x as usize] == TileType::Empty;
    }
-
-   pub fn change_position(&mut self, x: f64, y: f64) {
-       self.position[0] = self.position[0] + x;
-       self.position[1] = self.position[1] + y;
-   }
-
 }
 
 impl Renderable for Map {
@@ -114,5 +109,12 @@ impl Renderable for Map {
                 }
             }
         }
+    }
+}
+
+impl camera_dependent_object for Map {
+    fn move_object(&mut self, x: f64, y: f64){
+        self.position[0] += x * config::MAP_TILES_PARRALAX_FACTOR;
+        self.position[1] += y * config::MAP_TILES_PARRALAX_FACTOR;
     }
 }

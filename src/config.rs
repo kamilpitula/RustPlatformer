@@ -10,3 +10,5 @@ pub static FRICTION: f64 = 0.7;
 pub static JUMP_SPEED: f64 = 300.0;
 pub static GRAVITY: f64 = 300.0;
 pub static BACKGROUND_PARRALAX_FACTOR: f64 = 0.7;
+pub static MAP_TILES_PARRALAX_FACTOR: f64 = 1.2;
+
