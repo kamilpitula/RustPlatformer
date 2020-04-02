@@ -30,7 +30,7 @@ impl Character {
         let mut animation_manager = AnimationManager::new(tex_loader);
         let moving_object = Moving_Object::new(
             [50.0, 300.0],
-            [30.0, 50.0],
+            [50.0, 50.0],
             [0.0, 1080.0],
             config::ACCELERATION,
             config::WALK_SPEED,
@@ -161,7 +161,7 @@ impl Renderable for Character {
                 .transform	
                 .trans(character_x, character_y);
 
-        rectangle(color, [0.0, 0.0, self.box_size_x, self.box_size_y], point_trans, gl);
+        // rectangle(color, [0.0, 0.0, self.box_size_x, self.box_size_y], point_trans, gl);
         
         self.animation_manager
             .get_animator(self.current_animator.to_string())
