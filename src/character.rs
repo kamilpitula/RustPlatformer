@@ -19,25 +19,32 @@ pub struct Character {
     current_state: CharacterState,
     current_animator: String,
     animation_manager: AnimationManager,
-    turned_back: bool
+    turned_back: bool,
+    box_size_x: f64,
+    box_size_y: f64
 }
 
 impl Character {
     pub fn new(key_map: Rc<RefCell<HashMap<Key, bool>>>, tex_loader: Rc<Texture_Loader>) -> Character {
 
         let mut animation_manager = AnimationManager::new(tex_loader);
-        animation_manager.add_sequence("idle".to_string(), "Character/Idle", 0.1, 1, 10);
-        animation_manager.add_sequence("run".to_string(), "Character/Run", 0.1, 1, 8);
-        animation_manager.add_sequence("jump".to_string(), "Character/Jump", 0.1, 1, 10);
+        let moving_object = Moving_Object::new(
+            [50.0, 300.0],
+            [30.0, 50.0],
+            [0.0, 1080.0],
+            config::ACCELERATION,
+            config::WALK_SPEED,
+            config::JUMP_SPEED);
+
+        let box_size_x = moving_object.aabb.half_size[0] * 2.0;
+        let box_size_y = moving_object.aabb.half_size[1] * 2.0;
+
+        animation_manager.add_sequence("idle".to_string(), "Character/Idle", 0.1, 1, 10, [box_size_x, box_size_y]);
+        animation_manager.add_sequence("run".to_string(), "Character/Run", 0.1, 1, 8, [box_size_x, box_size_y]);
+        animation_manager.add_sequence("jump".to_string(), "Character/Jump", 0.1, 1, 10, [box_size_x, box_size_y]);
 
         Character { 
-            moving_object: Moving_Object::new(
-                [50.0, 300.0],
-                [30.0, 50.0],
-                [0.0, 1080.0],
-                config::ACCELERATION,
-                config::WALK_SPEED,
-                config::JUMP_SPEED),
+            moving_object: moving_object,
             current_state: CharacterState::Stand,
             key_pressed_map: key_map,
             pressed_jump: false,
@@ -46,6 +53,8 @@ impl Character {
             current_animator: "idle".to_string(),
             animation_manager: animation_manager,
             turned_back: false,
+            box_size_x: box_size_x,
+            box_size_y: box_size_y
         }
     }
 
@@ -147,19 +156,16 @@ impl Renderable for Character {
 
         let character_x = self.moving_object.position[0];	
         let character_y = self.moving_object.position[1];
-        
-        let box_size_x = self.moving_object.aabb.half_size[0] * 2.0;
-        let box_size_y = self.moving_object.aabb.half_size[1] * 2.0;
 
         let point_trans = ctx	
                 .transform	
                 .trans(character_x, character_y);
 
-        rectangle(color, [0.0, 0.0, box_size_x, box_size_y], point_trans, gl);
+        rectangle(color, [0.0, 0.0, self.box_size_x, self.box_size_y], point_trans, gl);
         
         self.animation_manager
             .get_animator(self.current_animator.to_string())
-            .render(ctx, gl, self.moving_object.position, [box_size_x, box_size_y] ,self.turned_back)
+            .render(ctx, gl, self.moving_object.position, self.turned_back)
     }
 }
 

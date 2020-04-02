@@ -20,13 +20,13 @@ impl AnimationManager {
         }
     }
 
-    pub fn add_sequence(&mut self, name: String, fileName: &str, interval: f64, start: i8, stop: i8 ) {
+    pub fn add_sequence(&mut self, name: String, fileName: &str, interval: f64, start: i8, stop: i8, box_size: Vec2d) {
         let mut textures = Vec::<Texture>::new();
         for i in start..stop + 1 {
             let texture = self.tex_loader.load_texture(&format!("{} ({}).png", fileName, i));
             textures.push(texture);
         }
-        let animator = RefCell::new(Animator::new(textures, interval));
+        let animator = RefCell::new(Animator::new(textures, interval, box_size));
         self.animators.insert(name, animator);
     }
 
