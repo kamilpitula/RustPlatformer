@@ -3,8 +3,13 @@ use super::config;
 use super::camera::camera_dependent_object;
 use super::renderable::Renderable;
 use super::colors;
+use super::animator;
+use super::texture_loader::Texture_Loader;
+use opengl_graphics::Texture;
 use opengl_graphics::GlGraphics;
 use graphics::Context;
+use std::rc::Rc;
+
 
 #[derive(Copy, Clone, PartialEq)]
 pub enum TileType {
@@ -18,21 +23,36 @@ pub struct Map {
     pub position: Vec2d,
     width: i8,
     height: i8,
-    pub tileSize: f64
+    pub tileSize: f64,
+    tileTexture: Texture,
+    tile_tex_scale: f64
 }
 
 impl Map {
 
-   pub fn new(tiles: Vec<Vec<TileType>>, position: Vec2d, width: i8, height: i8, tileSize: f64) -> Map {
-    Map {
-        tiles: tiles,
-        position: position,
-        width: width,
-        height: height,
-        tileSize: tileSize
-    }
+   pub fn new(tiles: Vec<Vec<TileType>>, position: Vec2d, width: i8, height: i8, tileSize: f64, texture_loader: Rc<Texture_Loader>) -> Map {
+        use graphics::*;
+
+        let texture = texture_loader.load_texture("Tiles/crate-std-2.png");
+        let texture_size = texture.get_size();
+
+        if texture_size.0 != texture_size.1 {
+            panic!("Tile texture must be square");
+        }
+
+        let tile_tex_scale = tileSize / texture_size.0 as f64;
+
+        Map {
+            tiles: tiles,
+            position: position,
+            width: width,
+            height: height,
+            tileSize: tileSize,
+            tileTexture: texture,
+            tile_tex_scale: tile_tex_scale
+        }
    }
- 
+
    pub fn get_map_tile_in_point(&self, point: Vec2d) -> (i8, i8) {
         let x = (point[0] - self.position[0] + (self.tileSize / 2.0)) / self.tileSize;
         let y = (point[1] - self.position[1] + (self.tileSize / 2.0)) / self.tileSize;
@@ -58,7 +78,7 @@ impl Map {
    pub fn get_tile(&self, x: i8, y :i8) -> TileType {
        if x < 0 || x >= self.width || y < 0 || y >= self.height {
            return TileType::Block;
-       } 
+       }
        return self.tiles[x as usize][y as usize];
    }
 
@@ -73,7 +93,7 @@ impl Map {
     if x < 0 || x >= self.width || y < 0 || y >= self.height {
         return false;
     }
-    return self.tiles[y as usize][x as usize] == TileType::OneWay 
+    return self.tiles[y as usize][x as usize] == TileType::OneWay
         || self.tiles[y as usize][x as usize] == TileType::Block;
    }
 
@@ -96,7 +116,7 @@ impl Renderable for Map {
     fn render(&mut self, ctx: &Context, gl: &mut GlGraphics) {
         use graphics::*;
 
-        let mut color = colors::DARK_GRAY;	
+        let mut color = colors::DARK_GRAY;
 
         for (i, columns) in self.tiles.iter().enumerate() {
             for (k, tile) in columns.iter().enumerate() {
@@ -104,8 +124,12 @@ impl Renderable for Map {
                     let y = self.tileSize * i as f64 + self.position[1];
                     let x = self.tileSize * k as f64 + self.position[0];
 
-                    let point_trans = ctx.transform.trans(x, y);
-                    rectangle(color, [0.0, 0.0, self.tileSize, self.tileSize], point_trans, gl);
+                    let point_trans = ctx.transform
+                        .trans(x, y)
+                        .scale(self.tile_tex_scale, self.tile_tex_scale);
+
+                    image(&self.tileTexture, point_trans, gl);
+                    // rectangle(color, [0.0, 0.0, self.tileSize, self.tileSize], point_trans, gl);
                 }
             }
         }
