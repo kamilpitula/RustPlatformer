@@ -16,6 +16,7 @@ pub struct Character {
     pub pressed_left: bool,
     pub pressed_right: bool,
     pub pressed_jump: bool,
+    pub pressed_drop: bool,
     current_state: CharacterState,
     current_animator: String,
     animation_manager: AnimationManager,
@@ -50,6 +51,7 @@ impl Character {
             pressed_jump: false,
             pressed_left: false,
             pressed_right: false,
+            pressed_drop: false,
             current_animator: "idle".to_string(),
             animation_manager: animation_manager,
             turned_back: false,
@@ -81,6 +83,11 @@ impl Character {
         if !self.moving_object.on_ground {
             self.current_state = CharacterState::Jump;
         }
+
+        if self.pressed_drop {
+            self.moving_object.drop();
+        }
+
         if self.pressed_left | self.pressed_right {
             self.current_state = CharacterState::Walk;
         }

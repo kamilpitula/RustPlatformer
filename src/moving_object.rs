@@ -29,10 +29,13 @@ pub struct Moving_Object{
     pub was_at_ceiling: bool,
     pub at_ceiling: bool,
 
+    pub on_one_way_platform: bool,
+
     bounds: Vec2d,
     accelerate: f64,
     max_speed: f64,
     jump_speed: f64,
+    one_way_platform_tsh: f64
 }
 
 impl Moving_Object {
@@ -53,12 +56,14 @@ impl Moving_Object {
             on_ground: true,
             was_at_ceiling: false,
             at_ceiling: false,
+            on_one_way_platform: false,
             aabb: AABB::new(position, mul_scalar(size, 0.5)),
             aabb_offset: mul_scalar(size, 0.5),
             bounds: bounds,
             accelerate: accelerate,
             max_speed: max_speed,
             jump_speed: jump_speed,
+            one_way_platform_tsh: 10.0
         }
     }
 
@@ -118,6 +123,13 @@ impl Moving_Object {
         self.acceleration = [self.accelerate * factor, self.acceleration[1]];
     }
 
+    pub fn drop(&mut self) {
+        if self.on_one_way_platform{
+            self.position = [self.position[0], self.position[1] + self.one_way_platform_tsh];
+            self.on_one_way_platform = false;
+        }
+    }
+
     pub fn update_physics(&mut self, delta: f64, map: &Map) {
         self.old_position = self.position;
         self.old_speed = self.speed;
@@ -139,7 +151,7 @@ impl Moving_Object {
         self.position = add(self.position, mul_scalar(self.speed, delta));
     }
 
-    pub fn has_ground(&self, oldPosition: Vec2d, position: Vec2d, speed: Vec2d, map: &Map) -> (bool, f64) {
+    pub fn has_ground(&mut self, oldPosition: Vec2d, position: Vec2d, speed: Vec2d, map: &Map) -> (bool, f64) {
         let (new_bottomRight, new_bottomLeft) = self.get_sensors(position);
         let (old_bottomRight, old_bottomLeft) = self.get_sensors(oldPosition);
 
@@ -153,7 +165,7 @@ impl Moving_Object {
             
             let mut checkedTile = bottomLeft;
 
-            while checkedTile[0] < new_bottomRight[0] {
+            while checkedTile[0] < bottomRight[0] {
 
                 checkedTile[0] = checkedTile[0].min(new_bottomRight[0]);
 
@@ -162,7 +174,14 @@ impl Moving_Object {
 
                 let groundY = tileIndexY as f64 * map.tileSize + map.position[1];
                 if map.is_obstacle(tileIndexX, tileIndexY){
+                    self.on_one_way_platform = false;
                     return (true,  groundY);
+                }
+                if map.is_one_way_platform(tileIndexX, tileIndexY) 
+                    && (checkedTile[1] - groundY).abs() < self.one_way_platform_tsh
+                {
+                    self.on_one_way_platform = true;
+                    return (true, groundY);
                 }
             }
         }

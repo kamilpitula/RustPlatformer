@@ -71,6 +71,7 @@ impl GameState for first_level{
         match *args {
             Keyboard(Key::A) | Keyboard(Key::Left) => {self.character.pressed_left = true},
             Keyboard(Key::D) | Keyboard(Key::Right) => self.character.pressed_right = true,
+            Keyboard(Key::S) | Keyboard(Key::Down) => self.character.pressed_drop = true,
             Keyboard(Key::Space) => self.character.pressed_jump = true,
             _ => {}
         }
@@ -80,6 +81,7 @@ impl GameState for first_level{
         match *args {
             Keyboard(Key::A) | Keyboard(Key::Left) => self.character.pressed_left = false,
             Keyboard(Key::D) | Keyboard(Key::Right) => self.character.pressed_right = false,
+            Keyboard(Key::S) | Keyboard(Key::Down) => self.character.pressed_drop = false,
             Keyboard(Key::Space) => self.character.pressed_jump = false,
             _ => {}
         }
