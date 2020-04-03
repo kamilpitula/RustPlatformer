@@ -25,6 +25,7 @@ pub struct Map {
     height: i8,
     pub tileSize: f64,
     tileTexture: Texture,
+    oneWayTexture: Texture,
     tile_tex_scale: f64
 }
 
@@ -34,6 +35,8 @@ impl Map {
         use graphics::*;
 
         let texture = texture_loader.load_texture("Tiles/crate-std-2.png");
+        let ow_texture = texture_loader.load_texture("Tiles/grid-line-1.png");
+
         let texture_size = texture.get_size();
 
         if texture_size.0 != texture_size.1 {
@@ -49,6 +52,7 @@ impl Map {
             height: height,
             tileSize: tileSize,
             tileTexture: texture,
+            oneWayTexture: ow_texture,
             tile_tex_scale: tile_tex_scale
         }
    }
@@ -110,26 +114,32 @@ impl Map {
     }
     return self.tiles[y as usize][x as usize] == TileType::Empty;
    }
+
+   pub fn render_tile(&self, ctx: &Context, gl: &mut GlGraphics, tileTexture: &Texture, tileIndex: (usize, usize)) {
+    use graphics::*;
+
+    let y = self.tileSize * tileIndex.0 as f64 + self.position[1];
+    let x = self.tileSize * tileIndex.1 as f64 + self.position[0];
+
+    let point_trans = ctx.transform
+        .trans(x, y)
+        .scale(self.tile_tex_scale, self.tile_tex_scale);
+
+    image(tileTexture, point_trans, gl);
+   }
 }
 
 impl Renderable for Map {
     fn render(&mut self, ctx: &Context, gl: &mut GlGraphics) {
-        use graphics::*;
-
-        let mut color = colors::DARK_GRAY;
 
         for (i, columns) in self.tiles.iter().enumerate() {
             for (k, tile) in columns.iter().enumerate() {
                 if *tile == TileType::Block {
-                    let y = self.tileSize * i as f64 + self.position[1];
-                    let x = self.tileSize * k as f64 + self.position[0];
+                    self.render_tile(&ctx, gl, &self.tileTexture, (i, k));
+                }
 
-                    let point_trans = ctx.transform
-                        .trans(x, y)
-                        .scale(self.tile_tex_scale, self.tile_tex_scale);
-
-                    image(&self.tileTexture, point_trans, gl);
-                    // rectangle(color, [0.0, 0.0, self.tileSize, self.tileSize], point_trans, gl);
+                if *tile == TileType::OneWay {
+                    self.render_tile(&ctx, gl, &self.oneWayTexture, (i, k));
                 }
             }
         }
