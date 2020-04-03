@@ -17,3 +17,4 @@ find_folder = "0.3.0"
 piston_window = "0.105.0"
 serde = {version = "1.0.104", features=["derive"]}
 serde_yaml = "0.8"
+interpolation = "0.2.0"

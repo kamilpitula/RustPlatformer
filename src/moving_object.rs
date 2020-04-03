@@ -3,6 +3,7 @@ use super::AABB::AABB;
 use super::config;
 use super::Map;
 use std::rc::Rc;
+use interpolation::Lerp;
 
 pub struct Moving_Object{
     pub old_position: Vec2d,
@@ -139,20 +140,30 @@ impl Moving_Object {
     }
 
     pub fn has_ground(&self, oldPosition: Vec2d, position: Vec2d, speed: Vec2d, map: &Map) -> (bool, f64) {
-        let (bottomRight, bottomLeft) = self.get_sensors(position);
-        let mut checkedTile = bottomLeft;
+        let (new_bottomRight, new_bottomLeft) = self.get_sensors(position);
+        let (old_bottomRight, old_bottomLeft) = self.get_sensors(oldPosition);
 
-        while checkedTile[0] < bottomRight[0] {
+        let endY = map.get_map_tileY_at_point(new_bottomLeft[1]);
+        let begY = (map.get_map_tileY_at_point(old_bottomLeft[1]) + 1).min(endY);
+        let dist = (begY - endY).abs().max(1);
 
-            checkedTile[0] = checkedTile[0].min(bottomRight[0]);
+        for tileIndexY in begY..endY + 1 {
+            let bottomRight = old_bottomRight.lerp(&new_bottomRight, &((endY - tileIndexY).abs() as f64 / dist as f64));
+            let bottomLeft = [bottomRight[0] - self.aabb.half_size[0] * 2.0 - 2.0, bottomRight[1]];
+            
+            let mut checkedTile = bottomLeft;
 
-            let tileIndexX = map.get_map_tileX_at_point(checkedTile[0]);
-            let tileIndexY = map.get_map_tileY_at_point(checkedTile[1]); 
-            checkedTile[0] = checkedTile[0] + map.tileSize;
+            while checkedTile[0] < new_bottomRight[0] {
 
-            let groundY = tileIndexY as f64 * map.tileSize + map.position[1];
-            if map.is_obstacle(tileIndexX, tileIndexY){
-                return (true,  groundY);
+                checkedTile[0] = checkedTile[0].min(new_bottomRight[0]);
+
+                let tileIndexX = map.get_map_tileX_at_point(checkedTile[0]);
+                checkedTile[0] = checkedTile[0] + map.tileSize;
+
+                let groundY = tileIndexY as f64 * map.tileSize + map.position[1];
+                if map.is_obstacle(tileIndexX, tileIndexY){
+                    return (true,  groundY);
+                }
             }
         }
         (false, 0.0)
