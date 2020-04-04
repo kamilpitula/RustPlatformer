@@ -70,7 +70,7 @@ impl Moving_Object {
     fn handle_right_side_collision(&mut self, map: &Map) {
         let (collides, wallX) = self.collides_right_side(&map);
         let mut x = self.bounds[1];
-        if collides {
+        if collides && self.speed[0] > 0.0 {
             x = self.bounds[1].min(wallX);
             self.position[0] = x - self.aabb.half_size[0] * 2.0;
             self.speed[0] = 0.0;
@@ -92,7 +92,7 @@ impl Moving_Object {
         let (collides, wallX) = self.collides_left_side(&map);
         let x = self.bounds[0].max(wallX);
 
-        if self.position[0] < x {
+        if self.position[0] < x && self.speed[0] < 0.0 {
             self.position[0] = x;
             self.speed[0] = 0.0;
             self.pushes_left_wall = true;
@@ -105,7 +105,7 @@ impl Moving_Object {
     fn check_ground_collision(&mut self, map: &Map) {
         let (has_ground, calculated_ground) = self.has_ground(&map);
 
-        if self.speed[1] >= 0.0 && has_ground {
+        if self.speed[1] > 0.0 && has_ground {
             self.position[1] = calculated_ground - self.aabb.half_size[1] * 2.0;//  - self.aabb_offset[1];
             self.speed[1] = 0.0;
             self.on_ground = true;
@@ -117,7 +117,7 @@ impl Moving_Object {
     fn check_ceiling_collision(&mut self, map: &Map) {
         let (has_ceiling, calculated_ceiling) = self.has_ceiling(&map);
 
-        if self.speed[1] <= 0.0 && has_ceiling {
+        if self.speed[1] < 0.0 && has_ceiling {
             self.position[1] = calculated_ceiling;//  - self.aabb_offset[1];
             self.speed[1] = 0.0;
         }
@@ -169,11 +169,10 @@ impl Moving_Object {
         self.pushed_left_wall = self.pushes_left_wall;
         self.was_at_ceiling = self.at_ceiling;
         
-        self.check_ground_collision(&map);
-        self.check_ceiling_collision(&map);
-
         self.handle_left_side_collision(&map);
         self.handle_right_side_collision(&map);
+        self.check_ground_collision(&map);
+        self.check_ceiling_collision(&map);
         
         self.aabb.center = add(self.position, self.aabb_offset);
         self.position = add(self.position, mul_scalar(self.speed, delta));
@@ -262,7 +261,12 @@ impl Moving_Object {
 
             while checkedTile[1] < bottomLeft[1] {
 
-                let y = checkedTile[1].max(bottomLeft[1]);
+                let mut y = checkedTile[1];
+
+                if checkedTile[1] > bottomLeft[1] {
+                   y = bottomLeft[1] 
+                }
+
                 let tileIndexY = map.get_map_tileY_at_point(y) - 1;
                 checkedTile[1] = checkedTile[1] + map.tileSize;
 
@@ -291,7 +295,11 @@ impl Moving_Object {
 
             while checkedTile[1] < bottomRight[1] {
 
-                let y = checkedTile[1].max(bottomRight[1]);
+                let mut y = checkedTile[1];
+
+                if checkedTile[1] > bottomRight[1] {
+                   y = bottomRight[1] 
+                }
 
                 let tileIndexY = map.get_map_tileY_at_point(y) - 1;
                 checkedTile[1] = checkedTile[1] + map.tileSize;
