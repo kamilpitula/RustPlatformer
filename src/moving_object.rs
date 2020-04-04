@@ -72,10 +72,14 @@ impl Moving_Object {
         let mut x = self.bounds[1];
         if collides {
             x = self.bounds[1].min(wallX);
+            self.position[0] = x - self.aabb.half_size[0] * 2.0;
+            self.speed[0] = 0.0;
+            self.pushes_right_wall = true;
+            return;
         }
 
-        if self.position[0] + self.aabb.half_size[0] * 2.0 > x {
-            self.position[0] = x - self.aabb.half_size[0];
+        if self.position[0] > self.bounds[1] {
+            self.position[0] = self.bounds[1] - self.aabb.half_size[0] * 2.0;
             self.speed[0] = 0.0;
             self.pushes_right_wall = true;
             return;
@@ -259,7 +263,7 @@ impl Moving_Object {
             while checkedTile[1] < bottomLeft[1] {
 
                 let y = checkedTile[1].max(bottomLeft[1]);
-                let tileIndexY = map.get_map_tileY_at_point(y) -1;
+                let tileIndexY = map.get_map_tileY_at_point(y) - 1;
                 checkedTile[1] = checkedTile[1] + map.tileSize;
 
                 if map.is_obstacle(tileIndexX, tileIndexY){
@@ -283,17 +287,17 @@ impl Moving_Object {
             let bottomRight = old_bottom_right.lerp(&new_bottom_right, &((endX - tileIndexX).abs() as f64 / dist as f64));
             let topRight = [bottomRight[0], bottomRight[1] - self.aabb.half_size[1] * 2.0 - 2.0];
             
-            let mut checkedTile = bottomRight;
+            let mut checkedTile = topRight;
 
-            while checkedTile[1] > topRight[1] {
+            while checkedTile[1] < bottomRight[1] {
 
-                checkedTile[1] = checkedTile[1].min(topRight[1]);
+                let y = checkedTile[1].max(bottomRight[1]);
 
-                let tileIndexY = map.get_map_tileY_at_point(checkedTile[1]) + 1;
-                checkedTile[1] = checkedTile[1] - map.tileSize;
+                let tileIndexY = map.get_map_tileY_at_point(y) - 1;
+                checkedTile[1] = checkedTile[1] + map.tileSize;
 
                 if map.is_obstacle(tileIndexX, tileIndexY){
-                    let wallX = tileIndexX as f64 * map.tileSize - map.tileSize / 2.0 + map.position[1];
+                    let wallX = tileIndexX as f64 * map.tileSize + map.position[0];
                     return (true,  wallX);
                 }
             }

@@ -69,7 +69,7 @@ impl Map {
    }
 
    pub fn get_map_tileX_at_point(&self, x: f64) -> i8 {
-       ((x - self.position[0] + (self.tileSize / 2.0)) / self.tileSize) as i8
+       ((x - self.position[0]) / self.tileSize) as i8
    }
 
    pub fn get_map_tile_position(&self, tileIndexX: i8, tileIndexY: i8) -> Vec2d {
