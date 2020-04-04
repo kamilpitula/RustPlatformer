@@ -76,17 +76,22 @@ impl Moving_Object {
         }
     }
 
-    fn check_left_wall_collision(&mut self) {
-        if self.position[0] < self.bounds[0] {
-            self.position[0] = self.bounds[0];
+    fn check_left_wall_collision(&mut self, map: &Map) {
+        let (collides, wallX) = self.collides_with_left_wall(&map);
+        let x = self.bounds[0].max(wallX);
+        
+        if self.position[0] < x {
+            self.position[0] = x;
+            self.speed[0] = 0.0;
             self.pushes_left_wall = true;
-        } else {
-            self.pushes_left_wall = false;
-        }
+            return;
+        } 
+
+        self.pushes_left_wall = false;
     }
 
     fn check_ground_collision(&mut self, map: &Map) {
-        let (has_ground, calculated_ground) = self.has_ground(self.speed, &map);
+        let (has_ground, calculated_ground) = self.has_ground(&map);
 
         if self.speed[1] >= 0.0 && has_ground {
             self.position[1] = calculated_ground - self.aabb.half_size[1] * 2.0;//  - self.aabb_offset[1];
@@ -98,7 +103,7 @@ impl Moving_Object {
     }
 
     fn check_ceiling_collision(&mut self, map: &Map) {
-        let (has_ceiling, calculated_ceiling) = self.has_ceiling(self.speed, &map);
+        let (has_ceiling, calculated_ceiling) = self.has_ceiling(&map);
 
         if self.speed[1] <= 0.0 && has_ceiling {
             self.position[1] = calculated_ceiling;//  - self.aabb_offset[1];
@@ -152,7 +157,7 @@ impl Moving_Object {
         self.pushed_left_wall = self.pushes_left_wall;
         self.was_at_ceiling = self.at_ceiling;
         
-        self.check_left_wall_collision();
+        self.check_left_wall_collision(&map);
         self.check_right_wall_collision();
         
         self.check_ground_collision(&map);
@@ -162,7 +167,7 @@ impl Moving_Object {
         self.position = add(self.position, mul_scalar(self.speed, delta));
     }
 
-    pub fn has_ground(&mut self, speed: Vec2d, map: &Map) -> (bool, f64) {
+    pub fn has_ground(&mut self, map: &Map) -> (bool, f64) {
         let (new_bottomRight, new_bottomLeft, _, _) = self.get_sensors(self.position);
         let (old_bottomRight, old_bottomLeft, _, _) = self.get_sensors(self.old_position);
 
@@ -199,7 +204,7 @@ impl Moving_Object {
         (false, 0.0)
     }
 
-    pub fn has_ceiling(&mut self, speed: Vec2d, map: &Map) -> (bool, f64) {
+    pub fn has_ceiling(&mut self, map: &Map) -> (bool, f64) {
         let (_, _, new_top_right, new_top_left) = self.get_sensors(self.position);
         let (_, _, old_top_right, old_topLeft) = self.get_sensors(self.old_position);
 
@@ -223,6 +228,36 @@ impl Moving_Object {
                 if map.is_obstacle(tileIndexX, tileIndexY){
                     let ceilingY = tileIndexY as f64 * map.tileSize + map.tileSize + map.position[1];
                     return (true,  ceilingY);
+                }
+            }
+        }
+        (false, 0.0)
+    }
+
+    pub fn collides_with_left_wall(&mut self, map: &Map) -> (bool, f64) {
+        let (_, new_bottom_left, _, new_top_left) = self.get_sensors(self.position);
+        let (_, old_bottom_left, _, old_topLeft) = self.get_sensors(self.old_position);
+
+        let endX = map.get_map_tileX_at_point(new_bottom_left[0]);
+        let begX = (map.get_map_tileX_at_point(old_bottom_left[0])).min(endX);
+        let dist = (endX - begX).abs().max(1);
+
+        for tileIndexX in begX..endX + 1 {
+            let bottomLeft = old_bottom_left.lerp(&new_bottom_left, &((endX - tileIndexX).abs() as f64 / dist as f64));
+            let topLeft = [bottomLeft[0], bottomLeft[1] - self.aabb.half_size[1] * 2.0 - 2.0];
+            
+            let mut checkedTile = bottomLeft;
+
+            while checkedTile[1] > topLeft[1] {
+
+                checkedTile[1] = checkedTile[1].min(topLeft[1]);
+
+                let tileIndexY = map.get_map_tileY_at_point(checkedTile[1]) + 1;
+                checkedTile[1] = checkedTile[1] - map.tileSize;
+
+                if map.is_obstacle(tileIndexX, tileIndexY){
+                    let wallX = tileIndexX as f64 * map.tileSize + map.tileSize + map.position[1];
+                    return (true,  wallX);
                 }
             }
         }
