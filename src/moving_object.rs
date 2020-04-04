@@ -85,8 +85,8 @@ impl Moving_Object {
         }
     }
 
-    fn check_ground_collision(&mut self, map: &Map, sensors: (Vec2d, Vec2d), old_sensors: (Vec2d, Vec2d)) {
-        let (has_ground, calculated_ground) = self.has_ground(sensors, old_sensors, self.speed, &map);
+    fn check_ground_collision(&mut self, map: &Map) {
+        let (has_ground, calculated_ground) = self.has_ground(self.speed, &map);
 
         if self.speed[1] >= 0.0 && has_ground {
             self.position[1] = calculated_ground - self.aabb.half_size[1] * 2.0;//  - self.aabb_offset[1];
@@ -97,8 +97,8 @@ impl Moving_Object {
         }
     }
 
-    fn check_ceiling_collision(&mut self, map: &Map, sensors: (Vec2d, Vec2d), old_sensors: (Vec2d, Vec2d)) {
-        let (has_ceiling, calculated_ceiling) = self.has_ceiling(sensors, old_sensors, self.speed, &map);
+    fn check_ceiling_collision(&mut self, map: &Map) {
+        let (has_ceiling, calculated_ceiling) = self.has_ceiling(self.speed, &map);
 
         if self.speed[1] <= 0.0 && has_ceiling {
             self.position[1] = calculated_ceiling;//  - self.aabb_offset[1];
@@ -151,22 +151,20 @@ impl Moving_Object {
         self.pushed_right_wall = self.pushes_right_wall;
         self.pushed_left_wall = self.pushes_left_wall;
         self.was_at_ceiling = self.at_ceiling;
-
-        let (bottomRight, bottomLeft, topRight, topLeft) = self.get_sensors(self.position);
-        let (old_bottomRight, old_bottomLeft, old_topRight, old_topLeft) = self.get_sensors(self.old_position);
         
         self.check_left_wall_collision();
         self.check_right_wall_collision();
-        self.check_ground_collision(&map, (bottomRight, bottomLeft), (old_bottomRight, old_bottomLeft));
-        self.check_ceiling_collision(&map, (topRight, topLeft), (old_topRight, old_topLeft));
+        
+        self.check_ground_collision(&map);
+        self.check_ceiling_collision(&map);
         
         self.aabb.center = add(self.position, self.aabb_offset);
         self.position = add(self.position, mul_scalar(self.speed, delta));
     }
 
-    pub fn has_ground(&mut self, sensors: (Vec2d, Vec2d), old_sensors: (Vec2d, Vec2d), speed: Vec2d, map: &Map) -> (bool, f64) {
-        let (new_bottomRight, new_bottomLeft) = sensors;
-        let (old_bottomRight, old_bottomLeft) = old_sensors;
+    pub fn has_ground(&mut self, speed: Vec2d, map: &Map) -> (bool, f64) {
+        let (new_bottomRight, new_bottomLeft, _, _) = self.get_sensors(self.position);
+        let (old_bottomRight, old_bottomLeft, _, _) = self.get_sensors(self.old_position);
 
         let endY = map.get_map_tileY_at_point(new_bottomLeft[1]);
         let begY = (map.get_map_tileY_at_point(old_bottomLeft[1]) + 1).min(endY);
@@ -201,9 +199,9 @@ impl Moving_Object {
         (false, 0.0)
     }
 
-    pub fn has_ceiling(&mut self, sensors: (Vec2d, Vec2d), old_sensors: (Vec2d, Vec2d), speed: Vec2d, map: &Map) -> (bool, f64) {
-        let (new_top_right, new_top_left) = sensors;
-        let (old_top_right, old_top_left) = old_sensors;
+    pub fn has_ceiling(&mut self, speed: Vec2d, map: &Map) -> (bool, f64) {
+        let (_, _, new_top_right, new_top_left) = self.get_sensors(self.position);
+        let (_, _, old_top_right, old_topLeft) = self.get_sensors(self.old_position);
 
         let endY = map.get_map_tileY_at_point(new_top_right[1]);
         let begY = (map.get_map_tileY_at_point(old_top_right[1]) + 1).min(endY);
@@ -217,7 +215,7 @@ impl Moving_Object {
 
             while checkedTile[0] < topRight[0] {
 
-                checkedTile[0] = checkedTile[0].min(topRight[0]);
+                checkedTile[0] = checkedTile[0].min(new_top_right[0]);
 
                 let tileIndexX = map.get_map_tileX_at_point(checkedTile[0]);
                 checkedTile[0] = checkedTile[0] + map.tileSize;
@@ -234,7 +232,7 @@ impl Moving_Object {
     fn get_sensors(&self, position: Vec2d) -> (Vec2d, Vec2d, Vec2d, Vec2d) {
         let center = add(position, self.aabb.half_size);
         let bottomRight = add(add(center, self.aabb.half_size), [1.0, 1.0]);
-        let topRight = sub(sub(center, self.aabb.half_size), [1.0, 1.0]);
+        let topRight = [center[0] + self.aabb.half_size[0] + 1.0, center[1] - self.aabb.half_size[1] - 1.0];
         let bottomLeft = [bottomRight[0] - self.aabb.half_size[0] * 2.0 - 2.0, bottomRight[1]];
         let topLeft = [topRight[0] - self.aabb.half_size[0] * 2.0 - 2.0, topRight[1]];
         (bottomRight, bottomLeft, topRight, topLeft)
