@@ -67,8 +67,8 @@ impl Moving_Object {
         }
     }
 
-    fn check_right_wall_collision(&mut self, map: &Map) {
-        let (collides, wallX) = self.collides_with_right_wall(&map);
+    fn handle_right_side_collision(&mut self, map: &Map) {
+        let (collides, wallX) = self.collides_right_side(&map);
         let mut x = self.bounds[1];
         if collides {
             x = self.bounds[1].min(wallX);
@@ -84,8 +84,8 @@ impl Moving_Object {
         self.pushes_right_wall = false;
     }
 
-    fn check_left_wall_collision(&mut self, map: &Map) {
-        let (collides, wallX) = self.collides_with_left_wall(&map);
+    fn handle_left_side_collision(&mut self, map: &Map) {
+        let (collides, wallX) = self.collides_left_side(&map);
         let x = self.bounds[0].max(wallX);
 
         if self.position[0] < x {
@@ -168,8 +168,8 @@ impl Moving_Object {
         self.check_ground_collision(&map);
         self.check_ceiling_collision(&map);
 
-        self.check_left_wall_collision(&map);
-        self.check_right_wall_collision(&map);
+        self.handle_left_side_collision(&map);
+        self.handle_right_side_collision(&map);
         
         self.aabb.center = add(self.position, self.aabb_offset);
         self.position = add(self.position, mul_scalar(self.speed, delta));
@@ -242,7 +242,7 @@ impl Moving_Object {
         (false, 0.0)
     }
 
-    pub fn collides_with_left_wall(&mut self, map: &Map) -> (bool, f64) {
+    pub fn collides_left_side(&mut self, map: &Map) -> (bool, f64) {
         let (_, new_bottom_left, _, new_top_left) = self.get_sensors(self.position);
         let (_, old_bottom_left, _, old_topLeft) = self.get_sensors(self.old_position);
 
@@ -250,21 +250,20 @@ impl Moving_Object {
         let begX = (map.get_map_tileX_at_point(old_bottom_left[0])).min(endX);
         let dist = (endX - begX).abs().max(1);
 
-        for tileIndexX in begX..endX + 1 {
+        for tileIndexX in ((endX - 1)..begX + 1).rev() {
             let bottomLeft = old_bottom_left.lerp(&new_bottom_left, &((endX - tileIndexX).abs() as f64 / dist as f64));
             let topLeft = [bottomLeft[0], bottomLeft[1] - self.aabb.half_size[1] * 2.0 - 2.0];
             
-            let mut checkedTile = bottomLeft;
+            let mut checkedTile = topLeft;
 
-            while checkedTile[1] > topLeft[1] {
+            while checkedTile[1] < bottomLeft[1] {
 
-                checkedTile[1] = checkedTile[1].min(topLeft[1]);
-
-                let tileIndexY = map.get_map_tileY_at_point(checkedTile[1]) + 1;
-                checkedTile[1] = checkedTile[1] - map.tileSize;
+                let y = checkedTile[1].max(bottomLeft[1]);
+                let tileIndexY = map.get_map_tileY_at_point(y) -1;
+                checkedTile[1] = checkedTile[1] + map.tileSize;
 
                 if map.is_obstacle(tileIndexX, tileIndexY){
-                    let wallX = tileIndexX as f64 * map.tileSize + map.tileSize + map.position[1];
+                    let wallX = tileIndexX as f64 * map.tileSize + map.tileSize + map.position[0];
                     return (true,  wallX);
                 }
             }
@@ -272,7 +271,7 @@ impl Moving_Object {
         (false, 0.0)
     }
 
-    pub fn collides_with_right_wall(&mut self, map: &Map) -> (bool, f64) {
+    pub fn collides_right_side(&mut self, map: &Map) -> (bool, f64) {
         let (new_bottom_right, _, new_top_right, _) = self.get_sensors(self.position);
         let (old_bottom_right, _, old_top_right, _) = self.get_sensors(self.old_position);
 
