@@ -67,19 +67,27 @@ impl Moving_Object {
         }
     }
 
-    fn check_right_wall_collision(&mut self) {
-        if self.position[0] > self.bounds[1] {
-            self.position[0] = self.bounds[1];
-            self.pushes_right_wall = true;
-        } else {
-            self.pushes_right_wall = false;
+    fn check_right_wall_collision(&mut self, map: &Map) {
+        let (collides, wallX) = self.collides_with_right_wall(&map);
+        let mut x = self.bounds[1];
+        if collides {
+            x = self.bounds[1].min(wallX);
         }
+
+        if self.position[0] + self.aabb.half_size[0] * 2.0 > x {
+            self.position[0] = x - self.aabb.half_size[0];
+            self.speed[0] = 0.0;
+            self.pushes_right_wall = true;
+            return;
+        }
+        
+        self.pushes_right_wall = false;
     }
 
     fn check_left_wall_collision(&mut self, map: &Map) {
         let (collides, wallX) = self.collides_with_left_wall(&map);
         let x = self.bounds[0].max(wallX);
-        
+
         if self.position[0] < x {
             self.position[0] = x;
             self.speed[0] = 0.0;
@@ -157,11 +165,11 @@ impl Moving_Object {
         self.pushed_left_wall = self.pushes_left_wall;
         self.was_at_ceiling = self.at_ceiling;
         
-        self.check_left_wall_collision(&map);
-        self.check_right_wall_collision();
-        
         self.check_ground_collision(&map);
         self.check_ceiling_collision(&map);
+
+        self.check_left_wall_collision(&map);
+        self.check_right_wall_collision(&map);
         
         self.aabb.center = add(self.position, self.aabb_offset);
         self.position = add(self.position, mul_scalar(self.speed, delta));
@@ -257,6 +265,36 @@ impl Moving_Object {
 
                 if map.is_obstacle(tileIndexX, tileIndexY){
                     let wallX = tileIndexX as f64 * map.tileSize + map.tileSize + map.position[1];
+                    return (true,  wallX);
+                }
+            }
+        }
+        (false, 0.0)
+    }
+
+    pub fn collides_with_right_wall(&mut self, map: &Map) -> (bool, f64) {
+        let (new_bottom_right, _, new_top_right, _) = self.get_sensors(self.position);
+        let (old_bottom_right, _, old_top_right, _) = self.get_sensors(self.old_position);
+
+        let endX = map.get_map_tileX_at_point(new_bottom_right[0]);
+        let begX = (map.get_map_tileX_at_point(old_bottom_right[0])).min(endX);
+        let dist = (endX - begX).abs().max(1);
+
+        for tileIndexX in begX..endX + 1 {
+            let bottomRight = old_bottom_right.lerp(&new_bottom_right, &((endX - tileIndexX).abs() as f64 / dist as f64));
+            let topRight = [bottomRight[0], bottomRight[1] - self.aabb.half_size[1] * 2.0 - 2.0];
+            
+            let mut checkedTile = bottomRight;
+
+            while checkedTile[1] > topRight[1] {
+
+                checkedTile[1] = checkedTile[1].min(topRight[1]);
+
+                let tileIndexY = map.get_map_tileY_at_point(checkedTile[1]) + 1;
+                checkedTile[1] = checkedTile[1] - map.tileSize;
+
+                if map.is_obstacle(tileIndexX, tileIndexY){
+                    let wallX = tileIndexX as f64 * map.tileSize - map.tileSize / 2.0 + map.position[1];
                     return (true,  wallX);
                 }
             }
