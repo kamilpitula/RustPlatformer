@@ -109,7 +109,7 @@ impl Moving_Object {
         let (has_ground, calculated_ground) = self.has_ground(&map);
 
         if self.speed[1] > 0.0 && has_ground {
-            self.position[1] = calculated_ground - self.aabb.half_size[1] * 2.0;//  - self.aabb_offset[1];
+            self.position[1] = calculated_ground - self.aabb.half_size[1] * 2.0;
             self.speed[1] = 0.0;
             self.on_ground = true;
         } else {
@@ -159,9 +159,15 @@ impl Moving_Object {
         }
     }
 
-    pub fn fall(&mut self) {
+    pub fn falling(&mut self) {
         if self.speed[1] >= 0.0 {
             self.acceleration[1] = config::GRAVITY * 2.5;
+        }
+    }
+
+    pub fn stop_falling(&mut self) {
+        if self.speed[1] >= 0.0 {
+            self.acceleration[1] = config::GRAVITY;
         }
     }
 

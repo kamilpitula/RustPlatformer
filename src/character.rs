@@ -130,8 +130,11 @@ impl Character {
     fn handle_jump(&mut self, delta: f64) {
         self.current_animator = "jump".to_string();
         if self.moving_object.on_ground {
+            self.moving_object.stop_falling();
             self.current_state = CharacterState::Stand;
+            return;
         }
+        
         if self.pressed_right {
             self.turned_back = false;
             if self.moving_object.pushes_left_wall {
@@ -149,7 +152,7 @@ impl Character {
             }
         }
 
-        self.moving_object.fall();
+        self.moving_object.falling();
     }
 }
 
