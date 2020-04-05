@@ -187,8 +187,8 @@ impl Moving_Object {
         let dist = (begY - endY).abs().max(1);
 
         for tileIndexY in begY..endY + 1 {
-            let bottomRight = old_bottomRight.lerp(&new_bottomRight, &((endY - tileIndexY).abs() as f64 / dist as f64));
-            let bottomLeft = [bottomRight[0] - self.aabb.half_size[0] * 2.0 - 2.0, bottomRight[1]];
+            let bottomRight = self.round_vector(old_bottomRight.lerp(&new_bottomRight, &((endY - tileIndexY).abs() as f64 / dist as f64)));
+            let bottomLeft = self.round_vector([bottomRight[0] - self.aabb.half_size[0] * 2.0 - 2.0, bottomRight[1]]);
             
             let mut checkedTile = bottomLeft;
 
@@ -224,8 +224,8 @@ impl Moving_Object {
         let dist = (begY - endY).abs().max(1);
 
         for tileIndexY in begY..endY + 1 {
-            let topRight = old_top_right.lerp(&new_top_right, &((endY - tileIndexY).abs() as f64 / dist as f64));
-            let topLeft = [topRight[0] - self.aabb.half_size[0] * 2.0 - 2.0, topRight[1]];
+            let topRight = self.round_vector(old_top_right.lerp(&new_top_right, &((endY - tileIndexY).abs() as f64 / dist as f64)));
+            let topLeft = self.round_vector([topRight[0] - self.aabb.half_size[0] * 2.0 - 2.0, topRight[1]]);
             
             let mut checkedTile = topLeft;
 
@@ -254,8 +254,9 @@ impl Moving_Object {
         let dist = (endX - begX).abs().max(1);
 
         for tileIndexX in ((endX - 1)..begX + 1).rev() {
-            let bottomLeft = old_bottom_left.lerp(&new_bottom_left, &((endX - tileIndexX).abs() as f64 / dist as f64));
-            let topLeft = [bottomLeft[0], bottomLeft[1] - self.aabb.half_size[1] * 2.0 - 2.0];
+            let bottomLeft = 
+                self.round_vector(old_bottom_left.lerp(&new_bottom_left, &((endX - tileIndexX).abs() as f64 / dist as f64)));
+            let topLeft = self.round_vector([bottomLeft[0], bottomLeft[1] - self.aabb.half_size[1] * 2.0 - 2.0]);
             
             let mut checkedTile = topLeft;
 
@@ -288,8 +289,10 @@ impl Moving_Object {
         let dist = (endX - begX).abs().max(1);
 
         for tileIndexX in begX..endX + 1 {
-            let bottomRight = old_bottom_right.lerp(&new_bottom_right, &((endX - tileIndexX).abs() as f64 / dist as f64));
-            let topRight = [bottomRight[0], bottomRight[1] - self.aabb.half_size[1] * 2.0 - 2.0];
+            let bottomRight = 
+                self.round_vector(old_bottom_right.lerp(&new_bottom_right, &((endX - tileIndexX).abs() as f64 / dist as f64)));
+            let topRight = 
+                self.round_vector([bottomRight[0], bottomRight[1] - self.aabb.half_size[1] * 2.0 - 2.0]);
             
             let mut checkedTile = topRight;
 
@@ -319,6 +322,13 @@ impl Moving_Object {
         let topRight = [center[0] + self.aabb.half_size[0] + 1.0, center[1] - self.aabb.half_size[1] - 1.0];
         let bottomLeft = [bottomRight[0] - self.aabb.half_size[0] * 2.0 - 2.0, bottomRight[1]];
         let topLeft = [topRight[0] - self.aabb.half_size[0] * 2.0 - 2.0, topRight[1]];
-        (bottomRight, bottomLeft, topRight, topLeft)
+        (self.round_vector(bottomRight),
+         self.round_vector(bottomLeft),
+         self.round_vector(topRight),
+         self.round_vector(topLeft))
+    }
+
+    fn round_vector(&self, vector: Vec2d) -> Vec2d {
+        [vector[0].round(), vector[1].round()]
     }
 }
