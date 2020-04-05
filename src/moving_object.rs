@@ -159,6 +159,12 @@ impl Moving_Object {
         }
     }
 
+    pub fn fall(&mut self) {
+        if self.speed[1] >= 0.0 {
+            self.acceleration[1] = config::GRAVITY * 2.5;
+        }
+    }
+
     pub fn update_physics(&mut self, delta: f64, map: &Map) {
         self.old_position = self.position;
         self.old_speed = self.speed;

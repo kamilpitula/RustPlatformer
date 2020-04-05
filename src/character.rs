@@ -148,6 +148,8 @@ impl Character {
                 self.moving_object.move_left(0.7);
             }
         }
+
+        self.moving_object.fall();
     }
 }
 
