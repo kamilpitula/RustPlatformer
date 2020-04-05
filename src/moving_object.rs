@@ -69,31 +69,34 @@ impl Moving_Object {
 
     fn handle_right_side_collision(&mut self, map: &Map) {
         let (collides, wallX) = self.collides_right_side(&map);
-        let mut x = self.bounds[1];
+        
+        if(self.position[0] >= self.bounds[1]) {
+            self.position[0] = self.bounds[1];
+            self.pushed_right_wall = true;
+            return;
+        }
+
         if collides && self.speed[0] > 0.0 {
-            x = self.bounds[1].min(wallX);
-            self.position[0] = x - self.aabb.half_size[0] * 2.0;
+            self.position[0] = wallX - self.aabb.half_size[0] * 2.0;
             self.speed[0] = 0.0;
             self.pushes_right_wall = true;
             return;
         }
 
-        if self.position[0] > self.bounds[1] {
-            self.position[0] = self.bounds[1] - self.aabb.half_size[0] * 2.0;
-            self.speed[0] = 0.0;
-            self.pushes_right_wall = true;
-            return;
-        }
-        
         self.pushes_right_wall = false;
     }
 
     fn handle_left_side_collision(&mut self, map: &Map) {
         let (collides, wallX) = self.collides_left_side(&map);
-        let x = self.bounds[0].max(wallX);
+        
+        if(self.position[0] <= self.bounds[0]) {
+            self.position[0] = self.bounds[0];
+            self.pushed_right_wall = true;
+            return;
+        }
 
-        if self.position[0] < x && self.speed[0] < 0.0 {
-            self.position[0] = x;
+        if collides && self.speed[0] < 0.0 {
+            self.position[0] = wallX;
             self.speed[0] = 0.0;
             self.pushes_left_wall = true;
             return;
@@ -225,7 +228,7 @@ impl Moving_Object {
 
         for tileIndexY in begY..endY + 1 {
             let topRight = self.round_vector(old_top_right.lerp(&new_top_right, &((endY - tileIndexY).abs() as f64 / dist as f64)));
-            let topLeft = self.round_vector([topRight[0] - self.aabb.half_size[0] * 2.0 - 2.0, topRight[1]]);
+            let topLeft = self.round_vector([topRight[0] - self.aabb.half_size[0] * 2.0 - 1.0, topRight[1]]);
             
             let mut checkedTile = topLeft;
 
@@ -253,7 +256,7 @@ impl Moving_Object {
         let begX = (map.get_map_tileX_at_point(old_bottom_left[0])).min(endX);
         let dist = (endX - begX).abs().max(1);
 
-        for tileIndexX in ((endX - 1)..begX + 1).rev() {
+        for tileIndexX in (endX..begX + 1).rev() {
             let bottomLeft = 
                 self.round_vector(old_bottom_left.lerp(&new_bottom_left, &((endX - tileIndexX).abs() as f64 / dist as f64)));
             let topLeft = self.round_vector([bottomLeft[0], bottomLeft[1] - self.aabb.half_size[1] * 2.0 - 2.0]);
