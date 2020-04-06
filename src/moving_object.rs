@@ -106,6 +106,13 @@ impl Moving_Object {
     }
 
     fn check_ground_collision(&mut self, map: &Map) {
+        let height = map.tiles[0].len() as f64 * map.tileSize;
+        if self.position[1] >= height {
+            self.position[1] = height;
+            self.speed[1] = 0.0;
+            self.on_ground = true;
+            return
+        }
         let (has_ground, calculated_ground) = self.has_ground(&map);
 
         if self.speed[1] > 0.0 && has_ground {
