@@ -168,7 +168,7 @@ impl Moving_Object {
 
     pub fn falling(&mut self) {
         if self.speed[1] >= 0.0 {
-            self.acceleration[1] = config::GRAVITY * 2.5;
+            self.acceleration[1] = config::GRAVITY * 7.5;
         }
     }
 

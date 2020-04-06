@@ -173,7 +173,7 @@ impl Renderable for Character {
                 .transform	
                 .trans(character_x, character_y);
 
-        rectangle(color, [0.0, 0.0, self.box_size_x, self.box_size_y], point_trans, gl);
+        // rectangle(color, [0.0, 0.0, self.box_size_x, self.box_size_y], point_trans, gl);
         
         self.animation_manager
             .get_animator(self.current_animator.to_string())
