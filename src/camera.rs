@@ -22,6 +22,12 @@ impl Camera{
             }
             character.moving_object.position[0] = self.min;
             let move_x = delta * character.moving_object.speed[0];
+
+            if background.x - move_x >= 0.0 {
+                background.x = 0.0;
+                return;
+            }
+
             background.move_object(-move_x, 0.0);
             map.move_object(-move_x, 0.0);
         }
