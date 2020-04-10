@@ -63,7 +63,7 @@ impl Moving_Object {
             accelerate: accelerate,
             max_speed: max_speed,
             jump_speed: jump_speed,
-            one_way_platform_tsh: 10.0
+            one_way_platform_tsh: 15.0
         }
     }
 
@@ -190,14 +190,14 @@ impl Moving_Object {
         self.pushed_right_wall = self.pushes_right_wall;
         self.pushed_left_wall = self.pushes_left_wall;
         self.was_at_ceiling = self.at_ceiling;
-        
+
+        self.aabb.center = add(self.position, self.aabb_offset);
+        self.position = add(self.position, mul_scalar(self.speed, delta));
+
         self.handle_left_side_collision(&map);
         self.handle_right_side_collision(&map);
         self.check_ground_collision(&map);
         self.check_ceiling_collision(&map);
-        
-        self.aabb.center = add(self.position, self.aabb_offset);
-        self.position = add(self.position, mul_scalar(self.speed, delta));
     }
 
     pub fn has_ground(&mut self, map: &Map) -> (bool, f64) {
