@@ -3,7 +3,7 @@ use super::moving_object::Moving_Object;
 pub struct Collider {
     gridAreaWidth: i8,
     gridAreaHeight: i8,
-    objectsInArea: Vec<Moving_Object>,
+    objectsInArea: Vec<Vec<Moving_Object>>,
     horizontalAreaCount: i8,
     verticalAreaCount: i8,
 }
@@ -15,15 +15,18 @@ impl Collider {
         }
 
         if levelHeight % gridAreaHeight != 0 {
-            panic!("wring level height");
+            panic!("wrong level height");
         }
+
+        let horizontalAreaCount = levelWidth / gridAreaWidth;
+        let verticalAreaCount = levelHeight / gridAreaHeight;
 
         Collider{
             gridAreaHeight: gridAreaHeight,
             gridAreaWidth: gridAreaWidth,
-            objectsInArea: Vec::new(),
-            horizontalAreaCount: levelWidth / gridAreaWidth,
-            verticalAreaCount: levelHeight / gridAreaHeight
+            objectsInArea: Vec::with_capacity((horizontalAreaCount * verticalAreaCount) as usize),
+            horizontalAreaCount: horizontalAreaCount,
+            verticalAreaCount: verticalAreaCount
         }
     }
 }
