@@ -1,4 +1,6 @@
 use graphics::math::*;
+use std::collections::HashMap;
+use std::rc::Rc;
 
 use super::moving_object::Moving_Object;
 use super::map::Map;
@@ -6,7 +8,7 @@ use super::map::Map;
 pub struct Collider {
     gridAreaWidth: i8,
     gridAreaHeight: i8,
-    objectsInArea: Vec<Vec<Moving_Object>>,
+    objectsInArea: HashMap<(i8,i8), Rc<Moving_Object>>,
     horizontalAreaCount: i8,
     verticalAreaCount: i8,
     overlappingAreas: Vec<(i8, i8)>
@@ -28,7 +30,7 @@ impl Collider {
         Collider {
             gridAreaHeight: gridAreaHeight,
             gridAreaWidth: gridAreaWidth,
-            objectsInArea: Vec::with_capacity((horizontalAreaCount * verticalAreaCount) as usize),
+            objectsInArea: HashMap::new(),
             horizontalAreaCount: horizontalAreaCount,
             verticalAreaCount: verticalAreaCount,
             overlappingAreas: Vec::new()
@@ -70,7 +72,24 @@ impl Collider {
             self.overlappingAreas.push(topRight);
             self.overlappingAreas.push(bottomRight);
         }
-        //TODO: moving object
+
+        for i in 0..object.areas.len() {
+            if !self.overlappingAreas.contains(&object.areas[i]) {
+                object.areas.remove(i);
+                if self.objectsInArea.contains_key(&object.areas[i]) {
+                    self.objectsInArea.remove(&object.areas[i]);
+                }
+            }
+        }
+
+        for i in 0..self.overlappingAreas.len() {
+            if !object.areas.contains(&self.overlappingAreas[i]) {
+                if !self.objectsInArea.contains_key(&object.areas[i]) {
+                    // self.objectsInArea.insert(object.areas[i], Rc::new(object));
+                }
+            }
+        }
+
         self.overlappingAreas.clear();
     }
 }

@@ -30,6 +30,7 @@ pub struct Moving_Object{
     pub at_ceiling: bool,
 
     pub on_one_way_platform: bool,
+    pub areas: Vec<(i8,i8)>,
 
     bounds: Vec2d,
     accelerate: f64,
@@ -63,7 +64,8 @@ impl Moving_Object {
             accelerate: accelerate,
             max_speed: max_speed,
             jump_speed: jump_speed,
-            one_way_platform_tsh: 15.0
+            one_way_platform_tsh: 15.0,
+            areas: Vec::new()
         }
     }
 
