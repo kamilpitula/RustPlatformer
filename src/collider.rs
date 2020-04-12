@@ -73,19 +73,24 @@ impl Collider {
             self.overlappingAreas.push(bottomRight);
         }
 
-        for i in 0..object.areas.len() {
-            if !self.overlappingAreas.contains(&object.areas[i]) {
-                object.areas.remove(i);
-                if self.objectsInArea.contains_key(&object.areas[i]) {
-                    self.objectsInArea.remove(&object.areas[i]);
+        let mut existing: Vec<(i8, i8)> = Vec::new();
+        for area in object.areas.iter() {
+            if !self.overlappingAreas.contains(&area) {
+                if self.objectsInArea.contains_key(&area) {
+                    self.objectsInArea.remove(&area);
                 }
             }
+            else {
+                existing.push(*area);
+            }
         }
+        object.areas = existing;
 
         for i in 0..self.overlappingAreas.len() {
             if !object.areas.contains(&self.overlappingAreas[i]) {
-                if !self.objectsInArea.contains_key(&object.areas[i]) {
-                    // self.objectsInArea.insert(object.areas[i], Rc::new(object));
+                if !self.objectsInArea.contains_key(&self.overlappingAreas[i]) {
+                    // self.objectsInArea.insert(self.overlappingAreas[i], Rc::new(object));
+                    object.areas.push(self.overlappingAreas[i])
                 }
             }
         }

@@ -19,6 +19,7 @@ use super::map::{Map, TileType};
 use std::collections::HashMap;
 use super::map_loader::MapLoader;
 use super::colors;
+use super::collider::Collider;
 
 pub struct first_level{
     background: Background,
@@ -26,7 +27,8 @@ pub struct first_level{
     key_press: Rc<RefCell<HashMap<Key,bool>>>,
     objects: Vec<Box<camera_dependent_object>>,
     camera: Camera,
-    map: Map
+    map: Map,
+    collider: Collider
 }
 
 impl first_level {
@@ -49,7 +51,8 @@ impl first_level {
             camera: Camera::new(460.0, 660.0),
             objects: Vec::new(),
             key_press: key_press,
-            map: map
+            map: map,
+            collider: Collider::new(8, 8, 120, 32)
         }
     }
 }
@@ -62,6 +65,7 @@ impl GameState for first_level{
     }
 
     fn update(&mut self, args: &UpdateArgs) -> State<GameData> {
+            self.collider.update_areas(&mut self.character.moving_object, &self.map);
             self.character.character_update(args.dt, &self.map);
             self.camera.update(&mut self.objects, &mut self.map, &mut self.character, &mut self.background, args.dt);
             return State::None;
