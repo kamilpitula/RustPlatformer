@@ -27,7 +27,7 @@ pub struct first_level{
     character: Character,
     key_press: Rc<RefCell<HashMap<Key,bool>>>,
     objects: Vec<Box<camera_dependent_object>>,
-    objectsInArea: HashMap<(i8,i8), Rc<Moving_Object>>,
+    objectsInArea: HashMap<(i8,i8), Rc<RefCell<Moving_Object>>>,
     camera: Camera,
     map: Map,
     collider: Collider

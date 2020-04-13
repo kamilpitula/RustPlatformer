@@ -1,6 +1,7 @@
 use graphics::math::*;
 use std::collections::HashMap;
 use std::rc::Rc;
+use std::cell::RefCell;
 
 use super::moving_object::Moving_Object;
 use super::map::Map;
@@ -35,7 +36,7 @@ impl Collider {
         }
     }
 
-    pub fn update_areas(&mut self, object: &mut Moving_Object, map: &Map, objectsInArea: &mut HashMap<(i8,i8), Rc<Moving_Object>>) {
+    pub fn update_areas(&mut self, object: &mut Moving_Object, map: &Map, objectsInArea: &mut HashMap<(i8,i8), Rc<RefCell<Moving_Object>>>) {
 
         let mut topLeft = map.get_map_tile_in_point(sub(object.aabb.center, object.aabb.half_size)); 
         let mut topRight = map.get_map_tile_in_point(
