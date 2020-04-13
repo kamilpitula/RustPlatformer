@@ -36,8 +36,9 @@ impl Collider {
         }
     }
 
-    pub fn update_areas(&mut self, object: &mut Moving_Object, map: &Map, objectsInArea: &mut HashMap<(i8,i8), Rc<RefCell<Moving_Object>>>) {
+    pub fn update_areas(&mut self, object_ptr: Rc<RefCell<Moving_Object>>, map: &Map, objectsInArea: &mut HashMap<(i8,i8), Rc<RefCell<Moving_Object>>>) {
 
+        let mut object = object_ptr.borrow_mut();
         let mut topLeft = map.get_map_tile_in_point(sub(object.aabb.center, object.aabb.half_size)); 
         let mut topRight = map.get_map_tile_in_point(
              [object.aabb.center[0] + object.aabb.half_size[0],
@@ -88,7 +89,7 @@ impl Collider {
         for i in 0..self.overlappingAreas.len() {
             if !object.areas.contains(&self.overlappingAreas[i]) {
                 if !objectsInArea.contains_key(&self.overlappingAreas[i]) {
-                    // self.objectsInArea.insert(self.overlappingAreas[i], Rc::new(object));
+                    objectsInArea.insert(self.overlappingAreas[i], Rc::clone(&object_ptr));
                     object.areas.push(self.overlappingAreas[i])
                 }
             }

@@ -16,12 +16,12 @@ impl Camera{
     }
 
     pub fn update(&mut self, objects: &mut Vec<Box<camera_dependent_object>>, map: &mut Map, character: &mut Character, background: &mut Background, delta: f64) {
-        if character.moving_object.position[0] <= self.min {
+        if character.moving_object.borrow_mut().position[0] <= self.min {
             if background.x >= 0.0 {
                 return;
             }
-            character.moving_object.position[0] = self.min;
-            let move_x = delta * character.moving_object.speed[0];
+            character.moving_object.borrow_mut().position[0] = self.min;
+            let move_x = delta * character.moving_object.borrow_mut().speed[0];
 
             if background.x - move_x >= 0.0 {
                 background.x = 0.0;
@@ -32,12 +32,12 @@ impl Camera{
             map.move_object(-move_x, 0.0);
         }
 
-        if character.moving_object.position[0] >= self.max {
+        if character.moving_object.borrow_mut().position[0] >= self.max {
             if background.x <= -(background.combined_width / 2.0) {
                 return;
             }
-            character.moving_object.position[0] = self.max;
-            let move_x = delta * character.moving_object.speed[0];
+            character.moving_object.borrow_mut().position[0] = self.max;
+            let move_x = delta * character.moving_object.borrow_mut().speed[0];
             background.move_object(-move_x, 0.0);
             map.move_object(-move_x, 0.0);
         }

@@ -21,10 +21,12 @@ use super::map_loader::MapLoader;
 use super::colors;
 use super::collider::Collider;
 use super::moving_object::Moving_Object;
+use super::config;
 
 pub struct first_level{
     background: Background,
     character: Character,
+    character_object: Rc<RefCell<Moving_Object>>,
     key_press: Rc<RefCell<HashMap<Key,bool>>>,
     objects: Vec<Box<camera_dependent_object>>,
     objectsInArea: HashMap<(i8,i8), Rc<RefCell<Moving_Object>>>,
@@ -46,10 +48,19 @@ impl first_level {
         (*key_press.borrow_mut()).insert(Key::D, false); 
 
         let map = Map::new(map_loader.load_map("level.map"), [0.0, 0.0], 120, 33, 24.0, Rc::clone(&texture_loader));
+        
+        let moving_object = Rc::new(RefCell::new(Moving_Object::new(
+            [50.0, 300.0],
+            [50.0, 50.0],
+            [0.0, 1080.0],
+            config::ACCELERATION,
+            config::WALK_SPEED,
+            config::JUMP_SPEED)));
 
         first_level {
             background: Background::new(background_texture, foreground_texture, 2, 1000.0),
-            character: Character::new(Rc::clone(&key_press), Rc::clone(&texture_loader)),
+            character: Character::new(Rc::clone(&key_press), Rc::clone(&texture_loader), Rc::clone(&moving_object)),
+            character_object: moving_object,
             camera: Camera::new(460.0, 660.0),
             objects: Vec::new(),
             key_press: key_press,
@@ -68,7 +79,7 @@ impl GameState for first_level{
     }
 
     fn update(&mut self, args: &UpdateArgs) -> State<GameData> {
-            self.collider.update_areas(&mut self.character.moving_object, &self.map, &mut self.objectsInArea);
+            self.collider.update_areas(Rc::clone(&self.character_object), &self.map, &mut self.objectsInArea);
             self.character.character_update(args.dt, &self.map);
             self.camera.update(&mut self.objects, &mut self.map, &mut self.character, &mut self.background, args.dt);
             return State::None;

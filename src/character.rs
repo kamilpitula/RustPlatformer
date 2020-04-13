@@ -11,7 +11,7 @@ use super::colors;
 use super::map::Map;
 
 pub struct Character {
-    pub moving_object: Moving_Object,
+    pub moving_object: Rc<RefCell<Moving_Object>>,
     pub key_pressed_map: Rc<RefCell<HashMap<Key, bool>>>,
     pub pressed_left: bool,
     pub pressed_right: bool,
@@ -26,7 +26,7 @@ pub struct Character {
 }
 
 impl Character {
-    pub fn new(key_map: Rc<RefCell<HashMap<Key, bool>>>, tex_loader: Rc<Texture_Loader>) -> Character {
+    pub fn new(key_map: Rc<RefCell<HashMap<Key, bool>>>, tex_loader: Rc<Texture_Loader>, object: Rc<RefCell<Moving_Object>>) -> Character {
 
         let mut animation_manager = AnimationManager::new(tex_loader);
         let moving_object = Moving_Object::new(
@@ -45,7 +45,7 @@ impl Character {
         animation_manager.add_sequence("jump".to_string(), "Character/Jump", 0.1, 1, 10, [box_size_x, box_size_y]);
 
         Character { 
-            moving_object: moving_object,
+            moving_object: object,
             current_state: CharacterState::Stand,
             key_pressed_map: key_map,
             pressed_jump: false,
@@ -74,25 +74,25 @@ impl Character {
             CharacterState::GrabLedge => {}
         }
         
-        self.moving_object.update_physics(delta, &map);
+        self.moving_object.borrow_mut().update_physics(delta, &map);
         self.animation_manager.get_animator(self.current_animator.to_string()).next(delta);
     }
 
     fn handle_stand(&mut self, delta: f64) {
         self.current_animator = "idle".to_string();
-        if !self.moving_object.on_ground {
+        if !self.moving_object.borrow_mut().on_ground {
             self.current_state = CharacterState::Jump;
         }
 
         if self.pressed_drop {
-            self.moving_object.drop();
+            self.moving_object.borrow_mut().drop();
         }
 
         if self.pressed_left | self.pressed_right {
             self.current_state = CharacterState::Walk;
         }
         else if self.pressed_jump {
-            self.moving_object.jump();
+            self.moving_object.borrow_mut().jump();
             self.current_state = CharacterState::Jump;
         }
         else {
@@ -104,55 +104,55 @@ impl Character {
         self.current_animator = "run".to_string();
         if self.pressed_right {
             self.turned_back = false;
-            if self.moving_object.pushes_right_wall {
-                self.moving_object.stop();
+            if self.moving_object.borrow_mut().pushes_right_wall {
+                self.moving_object.borrow_mut().stop();
             } else {
-                self.moving_object.move_right(1.0);
+                self.moving_object.borrow_mut().move_right(1.0);
             }
         }
         else if self.pressed_left {
             self.turned_back = true;
-            if self.moving_object.pushes_left_wall {
-                self.moving_object.stop();
+            if self.moving_object.borrow_mut().pushes_left_wall {
+                self.moving_object.borrow_mut().stop();
             } else {
-                self.moving_object.move_left(1.0);
+                self.moving_object.borrow_mut().move_left(1.0);
             }
         } else {
             self.current_state = CharacterState::Stand;
         }
 
         if self.pressed_jump {
-            self.moving_object.jump();
+            self.moving_object.borrow_mut().jump();
             self.current_state = CharacterState::Jump;
         }
     }
 
     fn handle_jump(&mut self, delta: f64) {
         self.current_animator = "jump".to_string();
-        if self.moving_object.on_ground {
-            self.moving_object.stop_falling();
+        if self.moving_object.borrow_mut().on_ground {
+            self.moving_object.borrow_mut().stop_falling();
             self.current_state = CharacterState::Stand;
             return;
         }
         
         if self.pressed_right {
             self.turned_back = false;
-            if self.moving_object.pushes_left_wall {
-                self.moving_object.stop();
+            if self.moving_object.borrow_mut().pushes_left_wall {
+                self.moving_object.borrow_mut().stop();
             } else {
-                self.moving_object.move_right(0.7);
+                self.moving_object.borrow_mut().move_right(0.7);
             }
         }
         else if self.pressed_left {
             self.turned_back = true;
-            if self.moving_object.pushes_left_wall {
-                self.moving_object.stop();
+            if self.moving_object.borrow_mut().pushes_left_wall {
+                self.moving_object.borrow_mut().stop();
             } else {
-                self.moving_object.move_left(0.7);
+                self.moving_object.borrow_mut().move_left(0.7);
             }
         }
 
-        self.moving_object.falling();
+        self.moving_object.borrow_mut().falling();
     }
 }
 
@@ -166,8 +166,8 @@ impl Renderable for Character {
 
         let mut color = colors::BLUE;	
 
-        let character_x = self.moving_object.position[0];	
-        let character_y = self.moving_object.position[1];
+        let character_x = self.moving_object.borrow_mut().position[0];	
+        let character_y = self.moving_object.borrow_mut().position[1];
 
         let point_trans = ctx	
                 .transform	
@@ -177,7 +177,7 @@ impl Renderable for Character {
         
         self.animation_manager
             .get_animator(self.current_animator.to_string())
-            .render(ctx, gl, self.moving_object.position, self.turned_back)
+            .render(ctx, gl, self.moving_object.borrow_mut().position, self.turned_back)
     }
 }
 
