@@ -20,12 +20,14 @@ use std::collections::HashMap;
 use super::map_loader::MapLoader;
 use super::colors;
 use super::collider::Collider;
+use super::moving_object::Moving_Object;
 
 pub struct first_level{
     background: Background,
     character: Character,
     key_press: Rc<RefCell<HashMap<Key,bool>>>,
     objects: Vec<Box<camera_dependent_object>>,
+    objectsInArea: HashMap<(i8,i8), Rc<Moving_Object>>,
     camera: Camera,
     map: Map,
     collider: Collider
@@ -52,7 +54,8 @@ impl first_level {
             objects: Vec::new(),
             key_press: key_press,
             map: map,
-            collider: Collider::new(8, 8, 120, 32)
+            collider: Collider::new(8, 8, 120, 32),
+            objectsInArea: HashMap::new(),
         }
     }
 }
@@ -65,7 +68,7 @@ impl GameState for first_level{
     }
 
     fn update(&mut self, args: &UpdateArgs) -> State<GameData> {
-            self.collider.update_areas(&mut self.character.moving_object, &self.map);
+            self.collider.update_areas(&mut self.character.moving_object, &self.map, &mut self.objectsInArea);
             self.character.character_update(args.dt, &self.map);
             self.camera.update(&mut self.objects, &mut self.map, &mut self.character, &mut self.background, args.dt);
             return State::None;

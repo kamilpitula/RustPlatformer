@@ -8,7 +8,6 @@ use super::map::Map;
 pub struct Collider {
     gridAreaWidth: i8,
     gridAreaHeight: i8,
-    objectsInArea: HashMap<(i8,i8), Rc<Moving_Object>>,
     horizontalAreaCount: i8,
     verticalAreaCount: i8,
     overlappingAreas: Vec<(i8, i8)>
@@ -30,14 +29,13 @@ impl Collider {
         Collider {
             gridAreaHeight: gridAreaHeight,
             gridAreaWidth: gridAreaWidth,
-            objectsInArea: HashMap::new(),
             horizontalAreaCount: horizontalAreaCount,
             verticalAreaCount: verticalAreaCount,
             overlappingAreas: Vec::new()
         }
     }
 
-    pub fn update_areas(&mut self, object: &mut Moving_Object, map: &Map) {
+    pub fn update_areas(&mut self, object: &mut Moving_Object, map: &Map, objectsInArea: &mut HashMap<(i8,i8), Rc<Moving_Object>>) {
 
         let mut topLeft = map.get_map_tile_in_point(sub(object.aabb.center, object.aabb.half_size)); 
         let mut topRight = map.get_map_tile_in_point(
@@ -76,8 +74,8 @@ impl Collider {
         let mut existing: Vec<(i8, i8)> = Vec::new();
         for area in object.areas.iter() {
             if !self.overlappingAreas.contains(&area) {
-                if self.objectsInArea.contains_key(&area) {
-                    self.objectsInArea.remove(&area);
+                if objectsInArea.contains_key(&area) {
+                    objectsInArea.remove(&area);
                 }
             }
             else {
@@ -88,7 +86,7 @@ impl Collider {
 
         for i in 0..self.overlappingAreas.len() {
             if !object.areas.contains(&self.overlappingAreas[i]) {
-                if !self.objectsInArea.contains_key(&self.overlappingAreas[i]) {
+                if !objectsInArea.contains_key(&self.overlappingAreas[i]) {
                     // self.objectsInArea.insert(self.overlappingAreas[i], Rc::new(object));
                     object.areas.push(self.overlappingAreas[i])
                 }
