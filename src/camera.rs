@@ -1,6 +1,9 @@
 use super::character::Character;
 use super::background::Background;
 use super::map::Map;
+use super::moving_object::Moving_Object;
+use std::rc::Rc;
+use std::cell::RefCell;
 
 pub struct Camera {
     min: f64,
@@ -15,7 +18,7 @@ impl Camera{
         }
     }
 
-    pub fn update(&mut self, objects: &mut Vec<Box<camera_dependent_object>>, map: &mut Map, character: &mut Character, background: &mut Background, delta: f64) {
+    pub fn update(&mut self, objects: &mut Vec<Rc<RefCell<Moving_Object>>>, map: &mut Map, character: &mut Character, background: &mut Background, delta: f64) {
         if character.moving_object.borrow_mut().position[0] <= self.min {
             if background.x >= 0.0 {
                 return;

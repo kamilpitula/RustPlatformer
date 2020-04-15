@@ -26,9 +26,8 @@ use super::config;
 pub struct first_level{
     background: Background,
     character: Character,
-    character_object: Rc<RefCell<Moving_Object>>,
     key_press: Rc<RefCell<HashMap<Key,bool>>>,
-    objects: Vec<Box<camera_dependent_object>>,
+    objects: Vec<Rc<RefCell<Moving_Object>>>,
     objectsInArea: HashMap<(i8,i8), Rc<RefCell<Moving_Object>>>,
     camera: Camera,
     map: Map,
@@ -57,12 +56,14 @@ impl first_level {
             config::WALK_SPEED,
             config::JUMP_SPEED)));
 
+        let mut objects = Vec::<Rc<RefCell<Moving_Object>>>::new();
+        objects.push(Rc::clone(&moving_object));
+
         first_level {
             background: Background::new(background_texture, foreground_texture, 2, 1000.0),
             character: Character::new(Rc::clone(&key_press), Rc::clone(&texture_loader), Rc::clone(&moving_object)),
-            character_object: moving_object,
             camera: Camera::new(460.0, 660.0),
-            objects: Vec::new(),
+            objects: objects,
             key_press: key_press,
             map: map,
             collider: Collider::new(8, 8, 120, 32),
@@ -79,10 +80,14 @@ impl GameState for first_level{
     }
 
     fn update(&mut self, args: &UpdateArgs) -> State<GameData> {
-            self.collider.update_areas(Rc::clone(&self.character_object), &self.map, &mut self.objectsInArea);
-            self.character.character_update(args.dt, &self.map);
-            self.camera.update(&mut self.objects, &mut self.map, &mut self.character, &mut self.background, args.dt);
-            return State::None;
+        
+        for object in &self.objects  {
+            self.collider.update_areas(Rc::clone(&object), &self.map, &mut self.objectsInArea);
+        }    
+            
+        self.character.character_update(args.dt, &self.map);
+        self.camera.update(&mut self.objects, &mut self.map, &mut self.character, &mut self.background, args.dt);
+        return State::None;
     }
 
     fn key_press(&mut self, args: &Button){
