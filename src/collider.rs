@@ -97,4 +97,28 @@ impl Collider {
 
         self.overlappingAreas.clear();
     }
+
+    pub fn check_collisions(&self, objectsInArea: &mut HashMap<(i8,i8), Rc<RefCell<Moving_Object>>>) {
+        for y in 0..self.verticalAreaCount {
+            for x in 0..self.horizontalAreaCount {
+                let objects = objectsInArea.get(&(x, y));
+                for objA in objects {
+                    for objB in objects {
+                        
+                    }
+                }
+            }
+        }
+    }
+}
+
+pub struct CollisionData {
+ other: Moving_Object,
+ overlap: Vec2d,
+ speed1: Vec2d,
+ speed2: Vec2d,
+ oldPos1: Vec2d,
+ oldPos2: Vec2d,
+ pos1: Vec2d,
+ pos2: Vec2d   
 }
