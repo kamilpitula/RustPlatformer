@@ -4,6 +4,7 @@ use super::map::Map;
 use super::moving_object::Moving_Object;
 use std::rc::Rc;
 use std::cell::RefCell;
+use std::collections::HashMap;
 
 pub struct Camera {
     min: f64,
@@ -18,13 +19,15 @@ impl Camera{
         }
     }
 
-    pub fn update(&mut self, objects: &mut Vec<Rc<RefCell<Moving_Object>>>, map: &mut Map, character: &mut Character, background: &mut Background, delta: f64) {
-        if character.moving_object.borrow_mut().position[0] <= self.min {
+    pub fn update(&mut self, objects: &mut HashMap<String, Rc<RefCell<Moving_Object>>>, map: &mut Map, character: &mut Character, background: &mut Background, delta: f64) {
+        let mut characterObject = objects["character"].borrow_mut();
+        
+        if characterObject.position[0] <= self.min {
             if background.x >= 0.0 {
                 return;
             }
-            character.moving_object.borrow_mut().position[0] = self.min;
-            let move_x = delta * character.moving_object.borrow_mut().speed[0];
+            characterObject.position[0] = self.min;
+            let move_x = delta * characterObject.speed[0];
 
             if background.x - move_x >= 0.0 {
                 background.x = 0.0;
@@ -35,12 +38,12 @@ impl Camera{
             map.move_object(-move_x, 0.0);
         }
 
-        if character.moving_object.borrow_mut().position[0] >= self.max {
+        if characterObject.position[0] >= self.max {
             if background.x <= -(background.combined_width / 2.0) {
                 return;
             }
-            character.moving_object.borrow_mut().position[0] = self.max;
-            let move_x = delta * character.moving_object.borrow_mut().speed[0];
+            characterObject.position[0] = self.max;
+            let move_x = delta * characterObject.speed[0];
             background.move_object(-move_x, 0.0);
             map.move_object(-move_x, 0.0);
         }

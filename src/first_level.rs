@@ -27,7 +27,7 @@ pub struct first_level{
     background: Background,
     character: Character,
     key_press: Rc<RefCell<HashMap<Key,bool>>>,
-    objects: Vec<Rc<RefCell<Moving_Object>>>,
+    objects: HashMap<String, Rc<RefCell<Moving_Object>>>,
     objectsInArea: HashMap<(i8,i8), Rc<RefCell<Moving_Object>>>,
     camera: Camera,
     map: Map,
@@ -56,12 +56,15 @@ impl first_level {
             config::WALK_SPEED,
             config::JUMP_SPEED)));
 
-        let mut objects = Vec::<Rc<RefCell<Moving_Object>>>::new();
-        objects.push(Rc::clone(&moving_object));
+        let box_size_x = moving_object.borrow().aabb.half_size[0] * 2.0;
+        let box_size_y = moving_object.borrow().aabb.half_size[1] * 2.0;
+
+        let mut objects = HashMap::<String, Rc<RefCell<Moving_Object>>>::new();
+        objects.insert("character".to_string(), Rc::clone(&moving_object));
 
         first_level {
             background: Background::new(background_texture, foreground_texture, 2, 1000.0),
-            character: Character::new(Rc::clone(&key_press), Rc::clone(&texture_loader), Rc::clone(&moving_object)),
+            character: Character::new(Rc::clone(&key_press), Rc::clone(&texture_loader), box_size_x, box_size_y),
             camera: Camera::new(460.0, 660.0),
             objects: objects,
             key_press: key_press,
@@ -76,17 +79,17 @@ impl GameState for first_level{
     fn render(&mut self, ctx: &Context, mut gl: &mut GlGraphics, glyphs: &mut GlyphCache){
         self.background.render(&ctx, &mut gl);
         self.map.render(&ctx, &mut gl);
-        self.character.render(&ctx, &mut gl);
+        self.character.render(&ctx, &mut gl, Rc::clone(&self.objects["character"]));
     }
 
     fn update(&mut self, args: &UpdateArgs) -> State<GameData> {
         
-        for object in &self.objects  {
+        for object in self.objects.values()  {
             self.collider.update_areas(Rc::clone(&object), &self.map, &mut self.objectsInArea);
         }    
         self.collider.check_collisions(&mut self.objectsInArea);
-        
-        self.character.character_update(args.dt, &self.map);
+
+        self.character.character_update(args.dt, &self.map, Rc::clone(&self.objects["character"]));
         self.camera.update(&mut self.objects, &mut self.map, &mut self.character, &mut self.background, args.dt);
         return State::None;
     }

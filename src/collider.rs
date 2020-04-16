@@ -104,7 +104,7 @@ impl Collider {
                 let objects = objectsInArea.get(&(x, y));
                 for objA in objects {
                     for objB in objects {
-                        
+
                     }
                 }
             }
