@@ -5,6 +5,7 @@ use super::renderable::Renderable;
 use super::colors;
 use super::animator;
 use super::texture_loader::Texture_Loader;
+use super::collider::AreaIndex;
 use opengl_graphics::Texture;
 use opengl_graphics::GlGraphics;
 use graphics::Context;
@@ -57,11 +58,14 @@ impl Map {
         }
    }
 
-   pub fn get_map_tile_in_point(&self, point: Vec2d) -> (i8, i8) {
+   pub fn get_map_tile_in_point(&self, point: Vec2d) -> AreaIndex {
         let x = (point[0] - self.position[0]) / self.tileSize;
         let y = (point[1] - self.position[1]) / self.tileSize;
 
-        (x as i8, y as i8)
+        AreaIndex{
+            x: x as i8,
+            y: y as i8
+        }
    }
 
    pub fn get_map_tileY_at_point(&self, y: f64) -> i8 {

@@ -19,7 +19,7 @@ use super::map::{Map, TileType};
 use std::collections::HashMap;
 use super::map_loader::MapLoader;
 use super::colors;
-use super::collider::Collider;
+use super::collider::{Collider, AreaIndex};
 use super::moving_object::Moving_Object;
 use super::config;
 
@@ -28,7 +28,7 @@ pub struct first_level{
     character: Character,
     key_press: Rc<RefCell<HashMap<Key,bool>>>,
     objects: HashMap<String, Rc<RefCell<Moving_Object>>>,
-    objectsInArea: HashMap<(i8,i8), Rc<RefCell<Moving_Object>>>,
+    objectsInArea: HashMap<AreaIndex, Vec<Rc<RefCell<Moving_Object>>>>,
     camera: Camera,
     map: Map,
     collider: Collider

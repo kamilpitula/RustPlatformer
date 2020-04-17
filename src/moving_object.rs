@@ -2,7 +2,7 @@ use graphics::math::*;
 use super::AABB::AABB;
 use super::config;
 use super::Map;
-use super::collider::CollisionData;
+use super::collider::{CollisionData, AreaIndex};
 use std::rc::Rc;
 use interpolation::Lerp;
 
@@ -31,7 +31,7 @@ pub struct Moving_Object{
     pub at_ceiling: bool,
 
     pub on_one_way_platform: bool,
-    pub areas: Vec<(i8,i8)>,
+    pub areas: Vec<AreaIndex>,
     pub allCollidingObjects: Vec<CollisionData>,
 
     bounds: Vec2d,
