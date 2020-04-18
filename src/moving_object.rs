@@ -1,9 +1,12 @@
 use graphics::math::*;
+use std::rc::Rc;
+use std::cell::RefCell;
+use std::collections::HashMap;
+use interpolation::Lerp;
+
 use super::AABB::AABB;
 use super::config;
 use super::map::{Map, AreaIndex};
-use std::rc::Rc;
-use interpolation::Lerp;
 
 pub struct Moving_Object{
     pub object_id: String,
@@ -32,7 +35,7 @@ pub struct Moving_Object{
 
     pub on_one_way_platform: bool,
     pub areas: Vec<AreaIndex>,
-    pub allCollidingObjects: Vec<CollisionData>,
+    pub allCollidingObjects: HashMap<String, CollisionData>,
 
     bounds: Vec2d,
     accelerate: f64,
@@ -69,7 +72,7 @@ impl Moving_Object {
             jump_speed: jump_speed,
             one_way_platform_tsh: 15.0,
             areas: Vec::new(),
-            allCollidingObjects: Vec::new()
+            allCollidingObjects: HashMap::new()
         }
     }
 
@@ -362,12 +365,12 @@ impl Moving_Object {
 }
 
 pub struct CollisionData {
-    other: Moving_Object,
-    overlap: Vec2d,
-    speed1: Vec2d,
-    speed2: Vec2d,
-    oldPos1: Vec2d,
-    oldPos2: Vec2d,
-    pos1: Vec2d,
-    pos2: Vec2d
+    pub other: Rc<RefCell<Moving_Object>>,
+    pub overlap: Vec2d,
+    pub speed1: Vec2d,
+    pub speed2: Vec2d,
+    pub oldPos1: Vec2d,
+    pub oldPos2: Vec2d,
+    pub pos1: Vec2d,
+    pub pos2: Vec2d
 }

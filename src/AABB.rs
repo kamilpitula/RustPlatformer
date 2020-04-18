@@ -25,4 +25,21 @@ impl AABB {
 
         return true;
     }
+
+    pub fn overlaps_signed(&self, other: &AABB) -> (bool, Vec2d) {
+        if self.half_size[0] == 0.0 
+            || self.half_size[1] == 0.0 
+            || other.half_size[0] == 0.0 
+            || other.half_size[1] == 0.0
+            || (self.center[0] - other.center[0]).abs() > self.half_size[0] + other.half_size[0]
+            || (self.center[1] - other.center[1]).abs() > self.half_size[1] + other.half_size[1] {
+                return (false, [0.0, 0.0]);
+        }
+
+        let overlaps = [(self.center[0] - other.center[0]).signum() * 
+                            ((other.half_size[0] + self.half_size[0]) - (self.center[0] - other.center[0]).abs()),
+                        (self.center[1] - other.center[1]).signum() * 
+                            ((other.half_size[1] + self.half_size[1]) - (self.center[1] - other.center[1]).abs())]; 
+        (true, overlaps)
+    }
 }

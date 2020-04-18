@@ -87,6 +87,7 @@ impl GameState for first_level{
         
         for object in self.objects.values()  {
             self.collider.update_areas(Rc::clone(&object), &self.map, &mut self.objectsInArea);
+            object.borrow_mut().allCollidingObjects.clear();
         }    
         self.collider.check_collisions(&mut self.objectsInArea);
 
