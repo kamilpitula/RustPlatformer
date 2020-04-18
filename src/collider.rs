@@ -126,42 +126,47 @@ impl Collider {
                             continue;
                         }
 
-                        for i in 0..objects.len() - 1 {
-                            let mut obj1 = objects[i].borrow_mut();
-                            for j in (i + 1)..objects.len() {
-                                let mut obj2 = objects[j].borrow_mut();
-                                let (collides, overlaps) = obj1.aabb.overlaps_signed(&obj2.aabb);
-                                if collides && !obj1.allCollidingObjects.contains_key(&obj2.object_id) {
-                                    let obj1_data = CollisionData {
-                                        other: Rc::clone(&objects[j]),
-                                        overlap: overlaps,
-                                        speed1: obj1.speed,
-                                        speed2: obj2.speed,
-                                        oldPos1: obj1.old_position,
-                                        oldPos2: obj2.old_position,
-                                        pos1: obj1.position,
-                                        pos2: obj2.position
-                                    };
-                                    obj1.allCollidingObjects.insert(obj2.object_id.clone(), obj1_data);
-
-                                    let obj2_data = CollisionData {
-                                        other: Rc::clone(&objects[i]),
-                                        overlap: overlaps,
-                                        speed1: obj2.speed,
-                                        speed2: obj1.speed,
-                                        oldPos1: obj2.old_position,
-                                        oldPos2: obj1.old_position,
-                                        pos1: obj2.position,
-                                        pos2: obj1.position
-                                    };
-                                    obj2.allCollidingObjects.insert(obj1.object_id.clone(), obj2_data);
-                                }
-                            }
-                        }
+                        self.check_collisions_in_area(&objects);
                     },
                     None => {},
                 }
                 
+            }
+        }
+    }
+
+    fn check_collisions_in_area(&self, objects: &Vec<Rc<RefCell<Moving_Object>>>) {
+        for i in 0..objects.len() - 1 {
+            let mut obj1 = objects[i].borrow_mut();
+            for j in (i + 1)..objects.len() {
+                let mut obj2 = objects[j].borrow_mut();
+                let (collides, overlaps) = obj1.aabb.overlaps_signed(&obj2.aabb);
+                if collides && !obj1.allCollidingObjects.contains_key(&obj2.object_id) {
+
+                    let obj1_data = CollisionData {
+                        other: Rc::clone(&objects[j]),
+                        overlap: overlaps,
+                        speed1: obj1.speed,
+                        speed2: obj2.speed,
+                        oldPos1: obj1.old_position,
+                        oldPos2: obj2.old_position,
+                        pos1: obj1.position,
+                        pos2: obj2.position
+                    };
+                    obj1.allCollidingObjects.insert(obj2.object_id.clone(), obj1_data);
+
+                    let obj2_data = CollisionData {
+                        other: Rc::clone(&objects[i]),
+                        overlap: overlaps,
+                        speed1: obj2.speed,
+                        speed2: obj1.speed,
+                        oldPos1: obj2.old_position,
+                        oldPos2: obj1.old_position,
+                        pos1: obj2.position,
+                        pos2: obj1.position
+                    };
+                    obj2.allCollidingObjects.insert(obj1.object_id.clone(), obj2_data);
+                }
             }
         }
     }
