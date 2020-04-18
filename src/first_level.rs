@@ -22,6 +22,7 @@ use super::colors;
 use super::collider::Collider;
 use super::moving_object::Moving_Object;
 use super::config;
+use super::npc::NPC;
 
 pub struct first_level{
     background: Background,
@@ -31,7 +32,8 @@ pub struct first_level{
     objectsInArea: HashMap<AreaIndex, HashMap<String, Rc<RefCell<Moving_Object>>>>,
     camera: Camera,
     map: Map,
-    collider: Collider
+    collider: Collider,
+    npc: NPC
 }
 
 impl first_level {
@@ -57,11 +59,24 @@ impl first_level {
             config::JUMP_SPEED,
             "1ad31e1d-494a-41fe-bb9c-e7b8b83e59f1".to_string())));
 
+        let npc_object = Rc::new(RefCell::new(Moving_Object::new(
+            [50.0, 300.0],
+            [50.0, 50.0],
+            [0.0, 1080.0],
+            config::ACCELERATION,
+            config::WALK_SPEED,
+            config::JUMP_SPEED,
+            "5c8cd4c5-8d44-4326-bfa2-c803a30109fc".to_string())));
+
         let box_size_x = moving_object.borrow().aabb.half_size[0] * 2.0;
         let box_size_y = moving_object.borrow().aabb.half_size[1] * 2.0;
 
+        let npc_box_size_x = npc_object.borrow().aabb.half_size[0] * 2.0;
+        let npc_box_size_y = npc_object.borrow().aabb.half_size[1] * 2.0;
+
         let mut objects = HashMap::<String, Rc<RefCell<Moving_Object>>>::new();
         objects.insert("character".to_string(), Rc::clone(&moving_object));
+        objects.insert("npc".to_string(), Rc::clone(&npc_object));
 
         first_level {
             background: Background::new(background_texture, foreground_texture, 2, 1000.0),
@@ -72,6 +87,7 @@ impl first_level {
             map: map,
             collider: Collider::new(8, 8, 120, 32),
             objectsInArea: HashMap::new(),
+            npc: NPC::new(Rc::clone(&texture_loader), npc_box_size_x, npc_box_size_y)
         }
     }
 }
@@ -81,6 +97,7 @@ impl GameState for first_level{
         self.background.render(&ctx, &mut gl);
         self.map.render(&ctx, &mut gl);
         self.character.render(&ctx, &mut gl, Rc::clone(&self.objects["character"]));
+        self.npc.render(&ctx, &mut gl, Rc::clone(&self.objects["npc"]));
     }
 
     fn update(&mut self, args: &UpdateArgs) -> State<GameData> {
@@ -92,6 +109,7 @@ impl GameState for first_level{
         self.collider.check_collisions(&mut self.objectsInArea);
 
         self.character.character_update(args.dt, &self.map, Rc::clone(&self.objects["character"]));
+        self.npc.character_update(args.dt, &self.map, Rc::clone(&self.objects["npc"]));
         self.camera.update(&mut self.objects, &mut self.map, &mut self.character, &mut self.background, args.dt);
         return State::None;
     }

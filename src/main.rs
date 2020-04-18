@@ -42,6 +42,7 @@ mod animator;
 mod map;
 mod map_loader;
 mod collider;
+mod npc;
 
 fn main() {
     let opengl = OpenGL::V3_2;

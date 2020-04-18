@@ -36,6 +36,13 @@ impl Camera{
 
             background.move_object(-move_x, 0.0);
             map.move_object(-move_x, 0.0);
+            
+            for (k, v) in objects.iter() {
+                if k == "character" {
+                    continue;
+                }
+                v.borrow_mut().move_object(-move_x, 0.0);
+            }
         }
 
         if characterObject.position[0] >= self.max {
@@ -44,8 +51,16 @@ impl Camera{
             }
             characterObject.position[0] = self.max;
             let move_x = delta * characterObject.speed[0];
+
             background.move_object(-move_x, 0.0);
             map.move_object(-move_x, 0.0);
+
+            for (k, v) in objects.iter() {
+                if k == "character" {
+                    continue;
+                }
+                v.borrow_mut().move_object(-move_x, 0.0);
+            }
         }
     }
 }

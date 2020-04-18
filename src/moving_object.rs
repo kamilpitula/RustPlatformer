@@ -187,6 +187,11 @@ impl Moving_Object {
         }
     }
 
+    pub fn move_object(&mut self, x: f64, y: f64){
+        self.position[0] += x * config::MAP_TILES_PARRALAX_FACTOR;
+        self.position[1] += y * config::MAP_TILES_PARRALAX_FACTOR;
+    }
+
     pub fn update_physics(&mut self, delta: f64, map: &Map) {
         self.old_position = self.position;
         self.old_speed = self.speed;
