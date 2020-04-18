@@ -3,8 +3,8 @@ use std::collections::HashMap;
 use std::rc::Rc;
 use std::cell::RefCell;
 
-use super::moving_object::Moving_Object;
-use super::map::Map;
+use super::moving_object::{Moving_Object, CollisionData};
+use super::map::{Map, AreaIndex};
 
 pub struct Collider {
     gridAreaWidth: i8,
@@ -126,21 +126,4 @@ impl Collider {
             }
         }
     }
-}
-
-pub struct CollisionData {
- other: Moving_Object,
- overlap: Vec2d,
- speed1: Vec2d,
- speed2: Vec2d,
- oldPos1: Vec2d,
- oldPos2: Vec2d,
- pos1: Vec2d,
- pos2: Vec2d   
-}
-
-#[derive(Eq, PartialEq, Hash, Clone)]
-pub struct AreaIndex {
-    pub x: i8,
-    pub y: i8
 }

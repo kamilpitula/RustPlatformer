@@ -5,7 +5,6 @@ use super::renderable::Renderable;
 use super::colors;
 use super::animator;
 use super::texture_loader::Texture_Loader;
-use super::collider::AreaIndex;
 use opengl_graphics::Texture;
 use opengl_graphics::GlGraphics;
 use graphics::Context;
@@ -17,6 +16,12 @@ pub enum TileType {
     Empty,
     Block,
     OneWay
+}
+
+#[derive(Eq, PartialEq, Hash, Clone)]
+pub struct AreaIndex {
+    pub x: i8,
+    pub y: i8
 }
 
 pub struct Map {

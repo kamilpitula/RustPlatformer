@@ -1,8 +1,7 @@
 use graphics::math::*;
 use super::AABB::AABB;
 use super::config;
-use super::Map;
-use super::collider::{CollisionData, AreaIndex};
+use super::map::{Map, AreaIndex};
 use std::rc::Rc;
 use interpolation::Lerp;
 
@@ -358,4 +357,15 @@ impl Moving_Object {
     fn round_vector(&self, vector: Vec2d) -> Vec2d {
         [vector[0].round(), vector[1].round()]
     }
+}
+
+pub struct CollisionData {
+    other: Moving_Object,
+    overlap: Vec2d,
+    speed1: Vec2d,
+    speed2: Vec2d,
+    oldPos1: Vec2d,
+    oldPos2: Vec2d,
+    pos1: Vec2d,
+    pos2: Vec2d
 }

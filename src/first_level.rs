@@ -15,11 +15,11 @@ use super::texture_loader::Texture_Loader;
 use super::background::Background;
 use super::character::Character;
 use super::camera::{Camera, camera_dependent_object};
-use super::map::{Map, TileType};
+use super::map::{Map, TileType, AreaIndex};
 use std::collections::HashMap;
 use super::map_loader::MapLoader;
 use super::colors;
-use super::collider::{Collider, AreaIndex};
+use super::collider::Collider;
 use super::moving_object::Moving_Object;
 use super::config;
 
