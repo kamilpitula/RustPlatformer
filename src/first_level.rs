@@ -60,7 +60,7 @@ impl first_level {
             "1ad31e1d-494a-41fe-bb9c-e7b8b83e59f1".to_string())));
 
         let npc_object = Rc::new(RefCell::new(Moving_Object::new(
-            [50.0, 300.0],
+            [300.0, 300.0],
             [50.0, 50.0],
             [0.0, 1080.0],
             config::ACCELERATION,

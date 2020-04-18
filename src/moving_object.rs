@@ -79,12 +79,6 @@ impl Moving_Object {
     fn handle_right_side_collision(&mut self, map: &Map) {
         let (collides, wallX) = self.collides_right_side(&map);
         
-        if(self.position[0] >= self.bounds[1]) {
-            self.position[0] = self.bounds[1];
-            self.pushed_right_wall = true;
-            return;
-        }
-
         if collides && self.speed[0] > 0.0 {
             self.position[0] = wallX - self.aabb.half_size[0] * 2.0;
             self.speed[0] = 0.0;
@@ -98,12 +92,6 @@ impl Moving_Object {
     fn handle_left_side_collision(&mut self, map: &Map) {
         let (collides, wallX) = self.collides_left_side(&map);
         
-        if(self.position[0] <= self.bounds[0]) {
-            self.position[0] = self.bounds[0];
-            self.pushed_right_wall = true;
-            return;
-        }
-
         if collides && self.speed[0] < 0.0 {
             self.position[0] = wallX;
             self.speed[0] = 0.0;
