@@ -123,7 +123,7 @@ impl Collider {
                             .collect();
                         
                         if objects.len() == 0 {
-                            return;
+                            continue;
                         }
 
                         for i in 0..objects.len() - 1 {
