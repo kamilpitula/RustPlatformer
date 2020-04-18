@@ -6,6 +6,7 @@ use std::rc::Rc;
 use interpolation::Lerp;
 
 pub struct Moving_Object{
+    pub object_id: String,
     pub old_position: Vec2d,
     pub position: Vec2d,
     pub old_speed: Vec2d,
@@ -41,8 +42,9 @@ pub struct Moving_Object{
 }
 
 impl Moving_Object {
-    pub fn new(position: Vec2d, size: Vec2d, bounds: Vec2d, accelerate: f64, max_speed: f64, jump_speed: f64) -> Moving_Object {
+    pub fn new(position: Vec2d, size: Vec2d, bounds: Vec2d, accelerate: f64, max_speed: f64, jump_speed: f64, object_id: String) -> Moving_Object {
         Moving_Object{
+            object_id: object_id,
             position: position,
             old_position: [0.0, 0.0],
             acceleration: [0.0, config::GRAVITY],

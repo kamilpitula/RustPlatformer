@@ -36,7 +36,7 @@ impl Collider {
         }
     }
 
-    pub fn update_areas(&mut self, object_ptr: Rc<RefCell<Moving_Object>>, map: &Map, objectsInArea: &mut HashMap<AreaIndex, Vec<Rc<RefCell<Moving_Object>>>>) {
+    pub fn update_areas(&mut self, object_ptr: Rc<RefCell<Moving_Object>>, map: &Map, objectsInArea: &mut HashMap<AreaIndex, HashMap<String, Rc<RefCell<Moving_Object>>>>) {
 
         let mut object = object_ptr.borrow_mut();
         let mut topLeft = map.get_map_tile_in_point(sub(object.aabb.center, object.aabb.half_size)); 
@@ -77,10 +77,12 @@ impl Collider {
         for area in object.areas.iter() {
             if !self.overlappingAreas.contains(&area) {
                 if objectsInArea.contains_key(&area) {
-                    // let mut area = objectsInArea
-                    //     .get_mut(&area)
-                    //     .unwrap(); //TODO: czy to zadziała?
-                    objectsInArea.remove(&area);
+                    
+                    let mut objs = objectsInArea
+                        .get_mut(&area)
+                        .unwrap();
+                    
+                    objs.remove(&object.object_id);
                 }
             }
             else {
@@ -92,13 +94,15 @@ impl Collider {
         for i in 0..self.overlappingAreas.len() {
             if !object.areas.contains(&self.overlappingAreas[i]) {
                 if !objectsInArea.contains_key(&self.overlappingAreas[i]) {
-                    objectsInArea.insert(self.overlappingAreas[i].clone(), vec!(Rc::clone(&object_ptr)));
+                    let mut map: HashMap<String, Rc<RefCell<Moving_Object>>> = HashMap::new();
+                    map.insert(object.object_id.clone(), Rc::clone(&object_ptr));
+                    objectsInArea.insert(self.overlappingAreas[i].clone(), map);
                 }
                 else {
                     objectsInArea
                         .get_mut(&self.overlappingAreas[i])
                         .unwrap()
-                        .push(Rc::clone(&object_ptr));
+                        .insert(object.object_id.clone(), Rc::clone(&object_ptr));
                 }
                 object.areas.push(self.overlappingAreas[i].clone())
             }
@@ -107,11 +111,21 @@ impl Collider {
         self.overlappingAreas.clear();
     }
 
-    pub fn check_collisions(&self, objectsInArea: &mut HashMap<AreaIndex, Vec<Rc<RefCell<Moving_Object>>>>) {
+    pub fn check_collisions(&self, objectsInArea: &mut HashMap<AreaIndex, HashMap<String, Rc<RefCell<Moving_Object>>>>) {
         for y in 0..self.verticalAreaCount {
             for x in 0..self.horizontalAreaCount {
                 match objectsInArea.get(&AreaIndex{x: x, y: y}) {
-                    Some(objects) => {
+                    Some(objectsMap) => {
+                        
+                        let objects:Vec<Rc<RefCell<Moving_Object>>> = objectsMap
+                            .iter()
+                            .map(|(k, v)| Rc::clone(v))
+                            .collect();
+                        
+                        if objects.len() == 0 {
+                            return;
+                        }
+
                         for i in 0..objects.len() - 1 {
                             let mut obj1 = objects[i].borrow_mut();
                             for j in (i + 1)..objects.len() {

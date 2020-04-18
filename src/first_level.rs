@@ -28,7 +28,7 @@ pub struct first_level{
     character: Character,
     key_press: Rc<RefCell<HashMap<Key,bool>>>,
     objects: HashMap<String, Rc<RefCell<Moving_Object>>>,
-    objectsInArea: HashMap<AreaIndex, Vec<Rc<RefCell<Moving_Object>>>>,
+    objectsInArea: HashMap<AreaIndex, HashMap<String, Rc<RefCell<Moving_Object>>>>,
     camera: Camera,
     map: Map,
     collider: Collider
@@ -54,7 +54,8 @@ impl first_level {
             [0.0, 1080.0],
             config::ACCELERATION,
             config::WALK_SPEED,
-            config::JUMP_SPEED)));
+            config::JUMP_SPEED,
+            "1ad31e1d-494a-41fe-bb9c-e7b8b83e59f1".to_string())));
 
         let box_size_x = moving_object.borrow().aabb.half_size[0] * 2.0;
         let box_size_y = moving_object.borrow().aabb.half_size[1] * 2.0;
