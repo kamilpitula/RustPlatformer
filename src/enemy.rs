@@ -13,7 +13,7 @@ use super::animation_manager::AnimationManager;
 use super::colors;
 use super::map::Map;
 
-pub struct NPC {
+pub struct Enemy {
     current_animator: String,
     animation_manager: AnimationManager,
     turned_back: bool,
@@ -21,14 +21,14 @@ pub struct NPC {
     box_size_y: f64
 }
 
-impl NPC {
-    pub fn new(tex_loader: Rc<Texture_Loader>, box_size_x: f64, box_size_y: f64) -> NPC {
+impl Enemy {
+    pub fn new(tex_loader: Rc<Texture_Loader>, box_size_x: f64, box_size_y: f64) -> Enemy {
 
         let mut animation_manager = AnimationManager::new(tex_loader);
 
-        animation_manager.add_sequence("idle".to_string(), "Npc/idle", 0.1, 1, 9, [box_size_x, box_size_y]);
+        animation_manager.add_sequence("idle".to_string(), "Enemy/idle", 0.1, 1, 9, [box_size_x, box_size_y]);
 
-        NPC { 
+        Enemy { 
             current_animator: "idle".to_string(),
             animation_manager: animation_manager,
             turned_back: false,
