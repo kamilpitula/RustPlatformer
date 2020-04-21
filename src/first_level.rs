@@ -24,16 +24,16 @@ use super::moving_object::Moving_Object;
 use super::config;
 use super::enemy::Enemy;
 
-pub struct first_level{
+pub struct first_level {
     background: Background,
     character: Character,
-    key_press: Rc<RefCell<HashMap<Key,bool>>>,
+    key_press: Rc<RefCell<HashMap<Key, bool>>>,
     objects: HashMap<String, Rc<RefCell<Moving_Object>>>,
     objectsInArea: HashMap<AreaIndex, HashMap<String, Rc<RefCell<Moving_Object>>>>,
     camera: Camera,
     map: Map,
     collider: Collider,
-    enemy: Enemy
+    enemy: Enemy,
 }
 
 impl first_level {
@@ -42,14 +42,14 @@ impl first_level {
         let foreground_texture = texture_loader.load_texture("City Foreground.png");
 
         let mut key_press = Rc::new(RefCell::new(HashMap::new()));
-        (*key_press.borrow_mut()).insert(Key::Left, false); 
-        (*key_press.borrow_mut()).insert(Key::Right, false); 
+        (*key_press.borrow_mut()).insert(Key::Left, false);
+        (*key_press.borrow_mut()).insert(Key::Right, false);
         (*key_press.borrow_mut()).insert(Key::Space, false);
-        (*key_press.borrow_mut()).insert(Key::A, false); 
-        (*key_press.borrow_mut()).insert(Key::D, false); 
+        (*key_press.borrow_mut()).insert(Key::A, false);
+        (*key_press.borrow_mut()).insert(Key::D, false);
 
         let map = Map::new(map_loader.load_map("level.map"), [0.0, 0.0], 120, 33, 24.0, Rc::clone(&texture_loader));
-        
+
         let moving_object = Rc::new(RefCell::new(Moving_Object::new(
             [50.0, 300.0],
             [50.0, 50.0],
@@ -87,13 +87,13 @@ impl first_level {
             map: map,
             collider: Collider::new(8, 8, 120, 32),
             objectsInArea: HashMap::new(),
-            enemy: Enemy::new(Rc::clone(&texture_loader), enemy_box_size_x, enemy_box_size_y)
+            enemy: Enemy::new(Rc::clone(&texture_loader), enemy_box_size_x, enemy_box_size_y),
         }
     }
 }
 
-impl GameState for first_level{
-    fn render(&mut self, ctx: &Context, mut gl: &mut GlGraphics, glyphs: &mut GlyphCache){
+impl GameState for first_level {
+    fn render(&mut self, ctx: &Context, mut gl: &mut GlGraphics, glyphs: &mut GlyphCache) {
         self.background.render(&ctx, &mut gl);
         self.map.render(&ctx, &mut gl);
         self.character.render(&ctx, &mut gl, Rc::clone(&self.objects["character"]));
@@ -101,11 +101,10 @@ impl GameState for first_level{
     }
 
     fn update(&mut self, args: &UpdateArgs) -> State<GameData> {
-        
-        for object in self.objects.values()  {
+        for object in self.objects.values() {
             self.collider.update_areas(Rc::clone(&object), &self.map, &mut self.objectsInArea);
             object.borrow_mut().allCollidingObjects.clear();
-        }    
+        }
         self.collider.check_collisions(&mut self.objectsInArea);
 
         self.character.character_update(args.dt, &self.map, Rc::clone(&self.objects["character"]));
@@ -114,9 +113,9 @@ impl GameState for first_level{
         return State::None;
     }
 
-    fn key_press(&mut self, args: &Button){
+    fn key_press(&mut self, args: &Button) {
         match *args {
-            Keyboard(Key::A) | Keyboard(Key::Left) => {self.character.pressed_left = true},
+            Keyboard(Key::A) | Keyboard(Key::Left) => { self.character.pressed_left = true }
             Keyboard(Key::D) | Keyboard(Key::Right) => self.character.pressed_right = true,
             Keyboard(Key::S) | Keyboard(Key::Down) => self.character.pressed_drop = true,
             Keyboard(Key::Space) => self.character.pressed_jump = true,
@@ -124,7 +123,7 @@ impl GameState for first_level{
         }
     }
 
-    fn key_release(&mut self, args: &Button){
+    fn key_release(&mut self, args: &Button) {
         match *args {
             Keyboard(Key::A) | Keyboard(Key::Left) => self.character.pressed_left = false,
             Keyboard(Key::D) | Keyboard(Key::Right) => self.character.pressed_right = false,

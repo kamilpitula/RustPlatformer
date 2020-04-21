@@ -25,7 +25,6 @@ impl Enemy {
     pub fn new(tex_loader: Rc<Texture_Loader>, box_size_x: f64, box_size_y: f64) -> Enemy {
 
         let mut animation_manager = AnimationManager::new(tex_loader);
-
         animation_manager.add_sequence("idle".to_string(), "Enemy/idle", 0.1, 1, 9, [box_size_x, box_size_y]);
 
         Enemy { 
