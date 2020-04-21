@@ -27,15 +27,15 @@ impl Animator {
         let sprite_size_x = sprite_half_size_x * 2.0;
 
         Animator {
-            sprites: sprites,
-            interval: interval,
+            sprites,
+            interval,
             current_sprite: 0,
             time_since_last: 0.0,
-            scale_x: scale_x,
-            scale_y: scale_y,
-            sprite_half_size_x: sprite_half_size_x,
-            sprite_size_x: sprite_size_x,
-            box_size: box_size
+            scale_x,
+            scale_y,
+            sprite_half_size_x,
+            sprite_size_x,
+            box_size
         }
     }
 

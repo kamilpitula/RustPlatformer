@@ -1,7 +1,7 @@
 use super::character::Character;
 use super::background::Background;
 use super::map::Map;
-use super::moving_object::Moving_Object;
+use super::moving_object::MovingObject;
 use std::rc::Rc;
 use std::cell::RefCell;
 use std::collections::HashMap;
@@ -14,20 +14,20 @@ pub struct Camera {
 impl Camera{
     pub fn new(min: f64, max: f64) -> Camera {
         Camera {
-            min: min,
-            max: max
+            min,
+            max
         }
     }
 
-    pub fn update(&mut self, objects: &mut HashMap<String, Rc<RefCell<Moving_Object>>>, map: &mut Map, character: &mut Character, background: &mut Background, delta: f64) {
-        let mut characterObject = objects["character"].borrow_mut();
+    pub fn update(&mut self, objects: &mut HashMap<String, Rc<RefCell<MovingObject>>>, map: &mut Map, _character: &mut Character, background: &mut Background, delta: f64) {
+        let mut character_object = objects["character"].borrow_mut();
         
-        if characterObject.position[0] <= self.min {
+        if character_object.position[0] <= self.min {
             if background.x >= 0.0 {
                 return;
             }
-            characterObject.position[0] = self.min;
-            let move_x = delta * characterObject.speed[0];
+            character_object.position[0] = self.min;
+            let move_x = delta * character_object.speed[0];
 
             if background.x - move_x >= 0.0 {
                 background.x = 0.0;
@@ -45,12 +45,12 @@ impl Camera{
             }
         }
 
-        if characterObject.position[0] >= self.max {
+        if character_object.position[0] >= self.max {
             if background.x <= -(background.combined_width / 2.0) {
                 return;
             }
-            characterObject.position[0] = self.max;
-            let move_x = delta * characterObject.speed[0];
+            character_object.position[0] = self.max;
+            let move_x = delta * character_object.speed[0];
 
             background.move_object(-move_x, 0.0);
             map.move_object(-move_x, 0.0);
@@ -65,6 +65,6 @@ impl Camera{
     }
 }
 
-pub trait camera_dependent_object {
+pub trait CameraDependentObject {
     fn move_object(&mut self, x: f64, y: f64);
 }

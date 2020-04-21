@@ -4,26 +4,26 @@ use std::rc::Rc;
 use std::cell::RefCell;
 use std::cell::RefMut;
 use opengl_graphics::Texture;
-use super::texture_loader::Texture_Loader;
+use super::texture_loader::TextureLoader;
 use super::animator::Animator;
 
 pub struct AnimationManager {
     animators: HashMap<String, RefCell<Animator>>,
-    tex_loader: Rc<Texture_Loader>
+    tex_loader: Rc<TextureLoader>
 }
 
 impl AnimationManager {
-    pub fn new(tex_loader: Rc<Texture_Loader>) -> AnimationManager {
+    pub fn new(tex_loader: Rc<TextureLoader>) -> AnimationManager {
         AnimationManager {
             animators: HashMap::<String, RefCell<Animator>>::new(),
-            tex_loader: tex_loader
+            tex_loader
         }
     }
 
-    pub fn add_sequence(&mut self, name: String, fileName: &str, interval: f64, start: i8, stop: i8, box_size: Vec2d) {
+    pub fn add_sequence(&mut self, name: String, file_name: &str, interval: f64, start: i8, stop: i8, box_size: Vec2d) {
         let mut textures = Vec::<Texture>::new();
         for i in start..stop + 1 {
-            let texture = self.tex_loader.load_texture(&format!("{} ({}).png", fileName, i));
+            let texture = self.tex_loader.load_texture(&format!("{} ({}).png", file_name, i));
             textures.push(texture);
         }
         let animator = RefCell::new(Animator::new(textures, interval, box_size));

@@ -11,33 +11,33 @@ use super::gamestate::GameState;
 use super::renderable::Renderable;
 use super::gamedata::GameData;
 use super::states::State;
-use super::texture_loader::Texture_Loader;
+use super::texture_loader::TextureLoader;
 use super::background::Background;
 use super::character::Character;
-use super::camera::{Camera, camera_dependent_object};
+use super::camera::{Camera, CameraDependentObject};
 use super::map::{Map, TileType, AreaIndex};
 use std::collections::HashMap;
 use super::map_loader::MapLoader;
 use super::colors;
 use super::collider::Collider;
-use super::moving_object::Moving_Object;
+use super::moving_object::MovingObject;
 use super::config;
 use super::enemy::Enemy;
 
-pub struct first_level {
+pub struct FirstLevel {
     background: Background,
     character: Character,
     key_press: Rc<RefCell<HashMap<Key, bool>>>,
-    objects: HashMap<String, Rc<RefCell<Moving_Object>>>,
-    objectsInArea: HashMap<AreaIndex, HashMap<String, Rc<RefCell<Moving_Object>>>>,
+    objects: HashMap<String, Rc<RefCell<MovingObject>>>,
+    objects_in_area: HashMap<AreaIndex, HashMap<String, Rc<RefCell<MovingObject>>>>,
     camera: Camera,
     map: Map,
     collider: Collider,
     enemy: Enemy,
 }
 
-impl first_level {
-    pub fn new(texture_loader: Rc<Texture_Loader>, map_loader: Rc<MapLoader>) -> first_level {
+impl FirstLevel {
+    pub fn new(texture_loader: Rc<TextureLoader>, map_loader: Rc<MapLoader>) -> FirstLevel {
         let background_texture = texture_loader.load_texture("City Background.png");
         let foreground_texture = texture_loader.load_texture("City Foreground.png");
 
@@ -50,7 +50,7 @@ impl first_level {
 
         let map = Map::new(map_loader.load_map("level.map"), [0.0, 0.0], 120, 33, 24.0, Rc::clone(&texture_loader));
 
-        let moving_object = Rc::new(RefCell::new(Moving_Object::new(
+        let moving_object = Rc::new(RefCell::new(MovingObject::new(
             [50.0, 300.0],
             [50.0, 50.0],
             [0.0, 1080.0],
@@ -59,7 +59,7 @@ impl first_level {
             config::JUMP_SPEED,
             "1ad31e1d-494a-41fe-bb9c-e7b8b83e59f1".to_string())));
 
-        let enemy_object = Rc::new(RefCell::new(Moving_Object::new(
+        let enemy_object = Rc::new(RefCell::new(MovingObject::new(
             [300.0, 300.0],
             [50.0, 50.0],
             [0.0, 1080.0],
@@ -74,11 +74,11 @@ impl first_level {
         let enemy_box_size_x = enemy_object.borrow().aabb.half_size[0] * 2.0;
         let enemy_box_size_y = enemy_object.borrow().aabb.half_size[1] * 2.0;
 
-        let mut objects = HashMap::<String, Rc<RefCell<Moving_Object>>>::new();
+        let mut objects = HashMap::<String, Rc<RefCell<MovingObject>>>::new();
         objects.insert("character".to_string(), Rc::clone(&moving_object));
         objects.insert("enemy".to_string(), Rc::clone(&enemy_object));
 
-        first_level {
+        FirstLevel {
             background: Background::new(background_texture, foreground_texture, 2, 1000.0),
             character: Character::new(Rc::clone(&key_press), Rc::clone(&texture_loader), box_size_x, box_size_y),
             camera: Camera::new(460.0, 660.0),
@@ -86,14 +86,14 @@ impl first_level {
             key_press: key_press,
             map: map,
             collider: Collider::new(8, 8, 120, 32),
-            objectsInArea: HashMap::new(),
+            objects_in_area: HashMap::new(),
             enemy: Enemy::new(Rc::clone(&texture_loader), enemy_box_size_x, enemy_box_size_y),
         }
     }
 }
 
-impl GameState for first_level {
-    fn render(&mut self, ctx: &Context, mut gl: &mut GlGraphics, glyphs: &mut GlyphCache) {
+impl GameState for FirstLevel {
+    fn render(&mut self, ctx: &Context, mut gl: &mut GlGraphics, _glyphs: &mut GlyphCache) {
         self.background.render(&ctx, &mut gl);
         self.map.render(&ctx, &mut gl);
         self.character.render(&ctx, &mut gl, Rc::clone(&self.objects["character"]));
@@ -102,10 +102,10 @@ impl GameState for first_level {
 
     fn update(&mut self, args: &UpdateArgs) -> State<GameData> {
         for object in self.objects.values() {
-            self.collider.update_areas(Rc::clone(&object), &self.map, &mut self.objectsInArea);
-            object.borrow_mut().allCollidingObjects.clear();
+            self.collider.update_areas(Rc::clone(&object), &self.map, &mut self.objects_in_area);
+            object.borrow_mut().all_colliding_objects.clear();
         }
-        self.collider.check_collisions(&mut self.objectsInArea);
+        self.collider.check_collisions(&mut self.objects_in_area);
 
         self.character.character_update(args.dt, &self.map, Rc::clone(&self.objects["character"]));
         self.enemy.character_update(args.dt, &self.map, Rc::clone(&self.objects["enemy"]));

@@ -16,7 +16,7 @@ use piston_window::*;
 use gamestate::GameState;
 use map::Map;
 use map_loader::MapLoader;
-use texture_loader::Texture_Loader;
+use texture_loader::TextureLoader;
 use states::State;
 use std::rc::Rc;
 use std::cmp;
@@ -57,10 +57,10 @@ fn main() {
                 .for_folder("assets")
                 .unwrap());
     
-    let texture_loader = Rc::new(Texture_Loader::new(Rc::clone(&assets)));
+    let texture_loader = Rc::new(TextureLoader::new(Rc::clone(&assets)));
     let map_loader = Rc::new(MapLoader::new(Rc::clone(&assets)));
 
-    let mut current_state: Box<dyn GameState> = Box::new(first_level::first_level::new(Rc::clone(&texture_loader), Rc::clone(&map_loader)));
+    let mut current_state: Box<dyn GameState> = Box::new(first_level::FirstLevel::new(Rc::clone(&texture_loader), Rc::clone(&map_loader)));
 
     let mut events = get_events_loop();
     let mut glyph_cache = get_font(Rc::clone(&assets));
@@ -86,10 +86,10 @@ fn main() {
         }
 
         if let Some(args) = e.update_args(){
-            let stateFinished = current_state.update(&args);
+            let state_finished = current_state.update(&args);
             
             current_state = 
-            match stateFinished {
+            match state_finished {
                 State::Start(data) => {current_state},
                 State::Game(data) => {current_state},
                 State::End(data) => {current_state},

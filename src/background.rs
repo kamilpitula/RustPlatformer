@@ -1,7 +1,7 @@
 use opengl_graphics::{Texture, GlGraphics};
 use graphics::Context;
 use super::renderable::Renderable;
-use super::camera::camera_dependent_object;
+use super::camera::CameraDependentObject;
 use super::config;
 
 pub struct Background {
@@ -19,14 +19,14 @@ pub struct Background {
 impl Background {
     pub fn new(background_texture: Texture, foreground_texture: Texture, repeat: i8, width: f64) -> Background {
         Background {
-            background_texture: background_texture,
-            foreground_texture: foreground_texture,
+            background_texture,
+            foreground_texture,
             x: 0.0,
             y: 0.0,
-            width: width,
+            width,
             left: false,
             right: false,
-            repeat: repeat,
+            repeat,
             combined_width: width * repeat as f64
         }
     }
@@ -48,7 +48,7 @@ impl Renderable for Background {
     }
 }
 
-impl camera_dependent_object for Background {
+impl CameraDependentObject for Background {
     fn move_object(&mut self, x: f64, y: f64){
         self.x += x;
         self.y += y;

@@ -2,13 +2,13 @@ use opengl_graphics::{Texture, TextureSettings};
 use std::path::PathBuf;
 use std::rc::Rc;
 
-pub struct Texture_Loader{
+pub struct TextureLoader {
     assets_path: Rc<PathBuf>
 }
 
-impl Texture_Loader {
-    pub fn new(assets_path: Rc<PathBuf>) -> Texture_Loader {
-        Texture_Loader{
+impl TextureLoader {
+    pub fn new(assets_path: Rc<PathBuf>) -> TextureLoader {
+        TextureLoader {
             assets_path: assets_path
         }
     }

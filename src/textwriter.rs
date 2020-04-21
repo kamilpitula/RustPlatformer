@@ -20,7 +20,7 @@ impl TextWriter {
         size: u32,
         pos_x: f64,
         pos_y: f64,
-        to_Write: &str) {
+        to_write: &str) {
         use graphics::*;
 
         let text_trans = ctx
@@ -28,7 +28,7 @@ impl TextWriter {
                 .trans(pos_x, pos_y);
 
             text::Text::new_color(color, size).draw(
-                to_Write,
+                to_write,
                 glyphs,
                 &ctx.draw_state,
                 text_trans,
