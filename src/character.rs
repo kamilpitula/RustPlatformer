@@ -51,22 +51,21 @@ impl Character {
         }
     }
 
-    pub fn character_update(&mut self, delta: f64, map: &Map, moving_object: Rc<RefCell<MovingObject>>){
-        let mut object = moving_object.borrow_mut();
+    pub fn character_update(&mut self, delta: f64, map: &Map, moving_object: &mut MovingObject){
         match &self.current_state {
             CharacterState::Stand => {
-                self.handle_stand(delta, &mut object);
+                self.handle_stand(delta, moving_object);
             },
             CharacterState::Walk => {
-                self.handle_walk(delta, &mut object);
+                self.handle_walk(delta, moving_object);
             },
             CharacterState::Jump => {
-                self.handle_jump(delta, &mut object);
+                self.handle_jump(delta, moving_object);
             },
             CharacterState::GrabLedge => {}
         }
-        
-        object.update_physics(delta, &map);
+
+        moving_object.update_physics(delta, &map);
         self.animation_manager.get_animator(self.current_animator.to_string()).next(delta);
     }
 
@@ -147,11 +146,9 @@ impl Character {
         moving_object.falling();
     }
 
-    pub fn render(&mut self, ctx: &Context, gl: &mut GlGraphics, object: Rc<RefCell<MovingObject>>) {
-        
+    pub fn render(&mut self, ctx: &Context, gl: &mut GlGraphics, moving_object: &mut MovingObject) {
 
         let mut color = colors::BLUE;	
-        let moving_object = object.borrow_mut();
 
         let character_x = moving_object.position[0];	
         let character_y = moving_object.position[1];

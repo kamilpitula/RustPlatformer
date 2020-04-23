@@ -19,15 +19,18 @@ impl Camera{
         }
     }
 
-    pub fn update(&mut self, objects: &mut HashMap<String, Rc<RefCell<MovingObject>>>, map: &mut Map, _character: &mut Character, background: &mut Background, delta: f64) {
-        let mut character_object = objects["character"].borrow_mut();
+    pub fn update(&mut self, objects: &mut HashMap<String, MovingObject>, map: &mut Map, _character: &mut Character, background: &mut Background, delta: f64) {
+        let character_object = &mut objects.get("1ad31e1d-494a-41fe-bb9c-e7b8b83e59f1").unwrap();
+        let position_x = character_object.position[0];
         
-        if character_object.position[0] <= self.min {
+        if position_x <= self.min {
             if background.x >= 0.0 {
                 return;
             }
-            character_object.position[0] = self.min;
-            let move_x = delta * character_object.speed[0];
+            let mut character = &mut objects.get_mut("1ad31e1d-494a-41fe-bb9c-e7b8b83e59f1").unwrap();
+
+            character.position[0] = self.min;
+            let move_x = delta * character.speed[0];
 
             if background.x - move_x >= 0.0 {
                 background.x = 0.0;
@@ -37,29 +40,31 @@ impl Camera{
             background.move_object(-move_x, 0.0);
             map.move_object(-move_x, 0.0);
             
-            for (k, v) in objects.iter() {
-                if k == "character" {
+            for (k, v) in objects.iter_mut() {
+                if k == "1ad31e1d-494a-41fe-bb9c-e7b8b83e59f1" {
                     continue;
                 }
-                v.borrow_mut().move_object(-move_x, 0.0);
+                v.move_object(-move_x, 0.0);
             }
         }
 
-        if character_object.position[0] >= self.max {
+        if position_x >= self.max {
             if background.x <= -(background.combined_width / 2.0) {
                 return;
             }
-            character_object.position[0] = self.max;
-            let move_x = delta * character_object.speed[0];
+            let mut character = &mut objects.get_mut("1ad31e1d-494a-41fe-bb9c-e7b8b83e59f1").unwrap();
+
+            character.position[0] = self.max;
+            let move_x = delta * character.speed[0];
 
             background.move_object(-move_x, 0.0);
             map.move_object(-move_x, 0.0);
 
-            for (k, v) in objects.iter() {
-                if k == "character" {
+            for (k, v) in objects.iter_mut() {
+                if k == "1ad31e1d-494a-41fe-bb9c-e7b8b83e59f1" {
                     continue;
                 }
-                v.borrow_mut().move_object(-move_x, 0.0);
+                v.move_object(-move_x, 0.0);
             }
         }
     }

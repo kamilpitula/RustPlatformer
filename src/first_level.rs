@@ -28,8 +28,8 @@ pub struct FirstLevel {
     background: Background,
     character: Character,
     key_press: Rc<RefCell<HashMap<Key, bool>>>,
-    objects: HashMap<String, Rc<RefCell<MovingObject>>>,
-    objects_in_area: HashMap<AreaIndex, HashMap<String, Rc<RefCell<MovingObject>>>>,
+    objects: HashMap<String, MovingObject>,
+    objects_in_area: HashMap<AreaIndex, Vec<String>>,
     camera: Camera,
     map: Map,
     collider: Collider,
@@ -48,35 +48,42 @@ impl FirstLevel {
         (*key_press.borrow_mut()).insert(Key::A, false);
         (*key_press.borrow_mut()).insert(Key::D, false);
 
-        let map = Map::new(map_loader.load_map("level.map"), [0.0, 0.0], 120, 33, 24.0, Rc::clone(&texture_loader));
+        let map = Map::new(
+            map_loader.load_map("level.map"),
+            [0.0, 0.0],
+            120,
+            33,
+            24.0,
+            Rc::clone(&texture_loader)
+        );
 
-        let moving_object = Rc::new(RefCell::new(MovingObject::new(
+        let moving_object = MovingObject::new(
             [50.0, 300.0],
             [50.0, 50.0],
             [0.0, 1080.0],
             config::ACCELERATION,
             config::WALK_SPEED,
             config::JUMP_SPEED,
-            "1ad31e1d-494a-41fe-bb9c-e7b8b83e59f1".to_string())));
+            "1ad31e1d-494a-41fe-bb9c-e7b8b83e59f1".to_string());
 
-        let enemy_object = Rc::new(RefCell::new(MovingObject::new(
+        let enemy_object = MovingObject::new(
             [300.0, 300.0],
             [50.0, 50.0],
             [0.0, 1080.0],
             config::ACCELERATION,
             config::WALK_SPEED,
             config::JUMP_SPEED,
-            "5c8cd4c5-8d44-4326-bfa2-c803a30109fc".to_string())));
+            "5c8cd4c5-8d44-4326-bfa2-c803a30109fc".to_string());
 
-        let box_size_x = moving_object.borrow().aabb.half_size[0] * 2.0;
-        let box_size_y = moving_object.borrow().aabb.half_size[1] * 2.0;
+        let box_size_x = moving_object.aabb.half_size[0] * 2.0;
+        let box_size_y = moving_object.aabb.half_size[1] * 2.0;
 
-        let enemy_box_size_x = enemy_object.borrow().aabb.half_size[0] * 2.0;
-        let enemy_box_size_y = enemy_object.borrow().aabb.half_size[1] * 2.0;
+        let enemy_box_size_x = enemy_object.aabb.half_size[0] * 2.0;
+        let enemy_box_size_y = enemy_object.aabb.half_size[1] * 2.0;
 
-        let mut objects = HashMap::<String, Rc<RefCell<MovingObject>>>::new();
-        objects.insert("character".to_string(), Rc::clone(&moving_object));
-        objects.insert("enemy".to_string(), Rc::clone(&enemy_object));
+        let mut objects = HashMap::<String, MovingObject>::new();
+        objects.insert("1ad31e1d-494a-41fe-bb9c-e7b8b83e59f1".to_string(), moving_object);
+        objects.insert("5c8cd4c5-8d44-4326-bfa2-c803a30109fc".to_string(), enemy_object);
 
         FirstLevel {
             background: Background::new(background_texture, foreground_texture, 2, 1000.0),
@@ -96,19 +103,19 @@ impl GameState for FirstLevel {
     fn render(&mut self, ctx: &Context, mut gl: &mut GlGraphics, _glyphs: &mut GlyphCache) {
         self.background.render(&ctx, &mut gl);
         self.map.render(&ctx, &mut gl);
-        self.character.render(&ctx, &mut gl, Rc::clone(&self.objects["character"]));
-        self.enemy.render(&ctx, &mut gl, Rc::clone(&self.objects["enemy"]));
+        self.character.render(&ctx, &mut gl, &mut self.objects.get_mut("1ad31e1d-494a-41fe-bb9c-e7b8b83e59f1").unwrap());
+        self.enemy.render(&ctx, &mut gl, &mut self.objects.get_mut("5c8cd4c5-8d44-4326-bfa2-c803a30109fc").unwrap());
     }
 
     fn update(&mut self, args: &UpdateArgs) -> State<GameData> {
-        for object in self.objects.values() {
-            self.collider.update_areas(Rc::clone(&object), &self.map, &mut self.objects_in_area);
-            object.borrow_mut().all_colliding_objects.clear();
+        for object in self.objects.values_mut() {
+            self.collider.update_areas(object, &self.map, &mut self.objects_in_area);
+            object.all_colliding_objects.clear();
         }
-        self.collider.check_collisions(&mut self.objects_in_area);
+        self.collider.check_collisions(&mut self.objects_in_area, &mut self.objects);
 
-        self.character.character_update(args.dt, &self.map, Rc::clone(&self.objects["character"]));
-        self.enemy.character_update(args.dt, &self.map, Rc::clone(&self.objects["enemy"]));
+        self.character.character_update(args.dt, &self.map, &mut self.objects.get_mut("1ad31e1d-494a-41fe-bb9c-e7b8b83e59f1").unwrap());
+        self.enemy.character_update(args.dt, &self.map, &mut self.objects.get_mut("5c8cd4c5-8d44-4326-bfa2-c803a30109fc").unwrap());
         self.camera.update(&mut self.objects, &mut self.map, &mut self.character, &mut self.background, args.dt);
         return State::None;
     }

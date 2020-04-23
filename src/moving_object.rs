@@ -358,7 +358,7 @@ impl MovingObject {
 }
 
 pub struct CollisionData {
-    pub other: Rc<RefCell<MovingObject>>,
+    pub other_key: String,
     pub overlap: Vec2d,
     pub speed1: Vec2d,
     pub speed2: Vec2d,

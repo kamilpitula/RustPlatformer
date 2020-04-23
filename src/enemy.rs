@@ -36,12 +36,11 @@ impl Enemy {
         }
     }
 
-    pub fn character_update(&mut self, delta: f64, map: &Map, moving_object: Rc<RefCell<MovingObject>>){
-        let mut object = moving_object.borrow_mut();
-        
-        self.handle_stand(delta, &mut object);
-        
-        object.update_physics(delta, &map);
+    pub fn character_update(&mut self, delta: f64, map: &Map, moving_object: &mut MovingObject){
+
+        self.handle_stand(delta, moving_object);
+
+        moving_object.update_physics(delta, &map);
         self.animation_manager.get_animator(self.current_animator.to_string()).next(delta);
     }
 
@@ -49,11 +48,9 @@ impl Enemy {
         self.current_animator = "idle".to_string();
     }
 
-    pub fn render(&mut self, ctx: &Context, gl: &mut GlGraphics, object: Rc<RefCell<MovingObject>>) {
+    pub fn render(&mut self, ctx: &Context, gl: &mut GlGraphics, moving_object: &mut MovingObject) {
         
-
-        let mut color = colors::BLUE;	
-        let moving_object = object.borrow_mut();
+        let mut color = colors::BLUE;
 
         let character_x = moving_object.position[0];	
         let character_y = moving_object.position[1];
